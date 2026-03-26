@@ -3,7 +3,7 @@ title: "GSoC 2025, ML4SCI GENIE: GNNs e SimCLR para Física de Partículas"
 description: "Submissão ao Google Summer of Code 2025 (ML4SCI / GENIE). Pipeline completo para representar eventos de jatos de partículas como grafos e treinar GNNs com aprendizado contrastivo, como fundação técnica para detecção de anomalias em buscas por nova física."
 technologies: ["Python", "PyTorch", "PyTorch Geometric", "EdgeConv", "SimCLR", "NT-Xent", "HDF5", "Jupyter Notebook"]
 mainResult: "EdgeConv GNN: AUC 0.779 na classificação quark/gluon. SimCLR sem supervisão: AUC 0.632 via linear probe, treinado em CPU."
-date: "2025-03"
+date: "2026-03"
 github: "https://github.com/felipetp-ctrl/gsoc-ml4sci-genie-submission"
 featured: true
 status: "completed"
