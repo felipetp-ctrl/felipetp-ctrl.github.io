@@ -8,7 +8,7 @@ github: "https://github.com/felipetp-ctrl/homl-deep-learning-ensemble-unsupervis
 featured: false
 status: "completed"
 study: true
-order: 2
+order: 3
 ---
 
 > **Repositório de estudo.** Notebooks com anotações e implementações seguindo o livro *Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow* (Géron, 3ª ed.), escritos em português.

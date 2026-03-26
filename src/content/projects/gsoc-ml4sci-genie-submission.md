@@ -7,7 +7,7 @@ date: "2025-03"
 github: "https://github.com/felipetp-ctrl/gsoc-ml4sci-genie-submission"
 featured: true
 status: "completed"
-order: 3
+order: 2
 ---
 
 **Felipe Tomé Pereira, Pontifícia Universidade Católica do Paraná (PUCPR)**

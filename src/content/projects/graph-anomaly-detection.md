@@ -7,7 +7,7 @@ date: "2026-03"
 github: "https://github.com/felipetp-ctrl/graph-anomaly-detection"
 featured: true
 status: "completed"
-order: 4
+order: 1
 ---
 
 Desenvolvido como parte do framework de detecção de anomalias proposto para o [ML4SCI GENIE, GSoC 2025](https://github.com/felipetp-ctrl/gsoc-ml4sci-genie-submission).
