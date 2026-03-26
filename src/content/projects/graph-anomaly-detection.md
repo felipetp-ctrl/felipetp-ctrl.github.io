@@ -10,7 +10,7 @@ status: "completed"
 order: 4
 ---
 
-Desenvolvido como parte do framework de detecção de anomalias proposto para o [ML4SCI GENIE — GSoC 2025](https://github.com/felipetp-ctrl/gsoc-ml4sci-genie-submission).
+Desenvolvido como parte do framework de detecção de anomalias proposto para o [ML4SCI GENIE, GSoC 2025](https://github.com/felipetp-ctrl/gsoc-ml4sci-genie-submission).
 
 ## Referência
 
@@ -22,19 +22,19 @@ Reimplementação parcial do framework GLADC com diferenças arquiteturais descr
 
 ## Arquitetura
 
-### Graph Autoencoder (GAE) — baseline
+### Graph Autoencoder (GAE), baseline
 
 - Encoder com camadas **EdgeConv** (em vez do GCN plain do paper original)
 - Decoder reconstrói a matriz de adjacência via `sigmoid(Z @ Z.T)` por grafo
 - Loss: **MSE de reconstrução** (mais estável que BCE na prática)
 - Score de anomalia: erro de reconstrução negativo (menor erro = mais normal)
 
-### SimCLR em Grafos — modelo principal
+### SimCLR em Grafos, modelo principal
 
-- Augmentações explícitas: **node feature dropout (p=0.1)** + **edge dropout (p=0.1)** para gerar duas views por grafo (em contraste com perturbação de pesos usada no paper)
+- Augmentações explícitas: **node feature dropout (p=0.1)** e **edge dropout (p=0.1)** para gerar duas views por grafo (em contraste com perturbação de pesos usada no paper)
 - Encoder EdgeConv retorna embeddings em nível de **nó** e de **grafo**
-- Projection head: MLP (2×hidden → proj_dim) com BatchNorm, NT-Xent loss com τ=0.5
-- Score de anomalia: distância híbrida nó + grafo ao centróide da distribuição de treino (`score = mean_node_error + graph_error`, distâncias L2 ao quadrado — inspirado na Eq. 11 do paper)
+- Projection head: MLP (2×hidden, proj_dim) com BatchNorm, NT-Xent loss com τ=0.5
+- Score de anomalia: distância híbrida nó e grafo ao centróide da distribuição de treino (`score = mean_node_error + graph_error`, distâncias L2 ao quadrado, inspirado na Eq. 11 do paper)
 
 ### Protocolo de Treino
 
@@ -86,7 +86,7 @@ pip install -r requirements.txt
 python iterative_train.py
 ```
 
-Para cada dataset, o script executa: download e pré-processamento → treino do GAE → treino do SimCLR → scores de anomalia → AUC comparativo impresso.
+Para cada dataset, o script executa: download e pré-processamento, treino do GAE, treino do SimCLR, scores de anomalia e AUC comparativo impresso.
 
 **Google Colab (GPU recomendado):**
 ```python

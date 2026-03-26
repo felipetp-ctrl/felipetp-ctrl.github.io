@@ -38,13 +38,13 @@ data/
 
 ## Pipeline
 
-1. **Carregar dados** — `src/linear_regression.py`
-2. **Limpeza** — remoção de nulos e outliers em `Price`, `Mileage`, `EngineV`, `Year`
-3. **Transformação** — log do preço para linearizar relações; dummies para categóricas
-4. **Multicolinearidade** — VIF calculado; `Year` removido por alta correlação com `Mileage`
-5. **Treino** — `LinearRegression` do scikit-learn
-6. **Avaliação** — R², MAE e RMSE no espaço original (`exp` do log); gráficos de resíduos
-7. **Interpretação** — coeficientes convertidos em % aproximado; resumo estatístico via statsmodels
+1. **Carregar dados**, `src/linear_regression.py`
+2. **Limpeza**, remoção de nulos e outliers em `Price`, `Mileage`, `EngineV`, `Year`
+3. **Transformação**, log do preço para linearizar relações, dummies para categóricas
+4. **Multicolinearidade**, VIF calculado, `Year` removido por alta correlação com `Mileage`
+5. **Treino**, `LinearRegression` do scikit-learn
+6. **Avaliação**, R², MAE e RMSE no espaço original (`exp` do log), gráficos de resíduos
+7. **Interpretação**, coeficientes convertidos em % aproximado, resumo estatístico via statsmodels
 
 ## Resultados
 
@@ -56,7 +56,7 @@ data/
 
 > RMSE e MAE reportados no espaço original após `exp(log_price)`.
 
-**Teste de Breusch-Pagan:** p-value = 3.2e−6 → rejeita homoscedasticidade. Variância dos resíduos não é constante, esperado em dados de preço com amplitude ampla.
+**Teste de Breusch-Pagan:** p-value = 3.2e-6, rejeita homoscedasticidade. Variância dos resíduos não é constante, esperado em dados de preço com amplitude ampla.
 
 ## Principais Perguntas Respondidas
 
