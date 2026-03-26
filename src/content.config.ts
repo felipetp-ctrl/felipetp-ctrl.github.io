@@ -14,6 +14,8 @@ const projects = defineCollection({
     demo: z.string().optional(),
     featured: z.boolean().default(false),
     status: z.enum(['completed', 'in-progress', 'published']).default('completed'),
+    study: z.boolean().default(false),
+    order: z.number().default(99),
   }),
 });
 

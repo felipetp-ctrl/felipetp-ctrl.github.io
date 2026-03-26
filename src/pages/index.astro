@@ -5,9 +5,7 @@ import CommitHeatmap from '../components/CommitHeatmap.astro';
 import { getCollection } from 'astro:content';
 
 const allProjects = await getCollection('projects');
-const projects = allProjects.sort((a, b) =>
-  new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
-);
+const projects = allProjects.sort((a, b) => a.data.order - b.data.order);
 ---
 
 <BaseLayout title="Felipe Tome Pereira — ML Research">
@@ -27,7 +25,7 @@ const projects = allProjects.sort((a, b) =>
         <a href="https://github.com/felipetp-ctrl" target="_blank" rel="noopener" class="btn btn--primary">
           GitHub
         </a>
-        <a href="https://linkedin.com/in/felipetp" target="_blank" rel="noopener" class="btn btn--outline">
+        <a href="https://linkedin.com/in/felipetpereira" target="_blank" rel="noopener" class="btn btn--outline">
           LinkedIn
         </a>
         <a href="mailto:felipetp@example.com" class="btn btn--ghost">
@@ -58,6 +56,7 @@ const projects = allProjects.sort((a, b) =>
             paper={project.data.paper}
             demo={project.data.demo}
             status={project.data.status}
+            study={project.data.study}
             index={i}
           />
         ))}

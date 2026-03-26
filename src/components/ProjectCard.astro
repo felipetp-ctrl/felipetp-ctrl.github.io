@@ -10,10 +10,11 @@ interface Props {
   paper?: string;
   demo?: string;
   status: string;
+  study: boolean;
   index: number;
 }
 
-const { title, description, technologies, mainResult, date, slug, github, paper, demo, status, index } = Astro.props;
+const { title, description, technologies, mainResult, date, slug, github, paper, demo, status, study, index } = Astro.props;
 
 const statusLabels: Record<string, string> = {
   completed: 'Concluído',
@@ -24,12 +25,15 @@ const statusLabels: Record<string, string> = {
 const num = String(index + 1).padStart(2, '0');
 ---
 
-<article class="project-card">
+<article class={`project-card${study ? ' project-card--study' : ''}`}>
   <div class="project-card__number">[{num}]</div>
 
   <div class="project-card__header">
     <a href={`/projects/${slug}`} class="project-card__title">{title}</a>
-    <span class={`status status--${status}`}>{statusLabels[status] ?? status}</span>
+    <div style="display:flex; gap:0.4rem; align-items:center; flex-shrink:0;">
+      {study && <span class="tag tag--study">estudo</span>}
+      <span class={`status status--${status}`}>{statusLabels[status] ?? status}</span>
+    </div>
   </div>
 
   <p class="project-card__desc">{description}</p>
@@ -62,3 +66,14 @@ const num = String(index + 1).padStart(2, '0');
     <span class="project-card__date">{date}</span>
   </div>
 </article>
+
+<style>
+  .tag--study {
+    background: #f0ece2;
+    border-color: #c8be9e;
+    color: #7a6c42;
+  }
+  .project-card--study {
+    border-style: dashed;
+  }
+</style>
