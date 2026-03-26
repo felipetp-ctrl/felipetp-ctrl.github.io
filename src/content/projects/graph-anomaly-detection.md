@@ -1,6 +1,6 @@
 ---
 title: "Deep Graph-Level Anomaly Detection com Aprendizado Contrastivo"
-description: "Reimplementação parcial do framework GLADC (Luo et al., 2022) para detecção não supervisionada de anomalias em grafos. Compara Graph Autoencoder (GAE) e SimCLR em 7 datasets TUDataset, como validação do pipeline proposto para o GSoC 2025 ML4SCI GENIE."
+description: "Reimplementação parcial do framework GLADC (Luo et al., 2022) para detecção não supervisionada de anomalias em grafos. Compara Graph Autoencoder (GAE) e SimCLR em 7 datasets TUDataset, como validação do pipeline proposto para o GSoC 2026 ML4SCI GENIE."
 technologies: ["Python", "PyTorch Geometric", "EdgeConv", "SimCLR", "NT-Xent", "AdamW", "TUDatasets", "Jupyter Notebook"]
 mainResult: "SimCLR superou o GLADC em ENZYMES (AUC 0.689 vs 0.583) e COX2 (0.647 vs 0.615). GAE atingiu AUC 0.989 em AIDS, próximo ao estado da arte."
 date: "2026-03"
@@ -10,7 +10,7 @@ status: "completed"
 order: 1
 ---
 
-Desenvolvido como parte do framework de detecção de anomalias proposto para o [ML4SCI GENIE, GSoC 2025](https://github.com/felipetp-ctrl/gsoc-ml4sci-genie-submission).
+Desenvolvido como parte do framework de detecção de anomalias proposto para o [ML4SCI GENIE, GSoC 2026](https://github.com/felipetp-ctrl/gsoc-ml4sci-genie-submission).
 
 ## Referência
 
