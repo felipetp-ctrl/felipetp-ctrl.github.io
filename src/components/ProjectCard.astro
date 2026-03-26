@@ -1,0 +1,64 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  technologies: string[];
+  mainResult: string;
+  date: string;
+  slug: string;
+  github?: string;
+  paper?: string;
+  demo?: string;
+  status: string;
+  index: number;
+}
+
+const { title, description, technologies, mainResult, date, slug, github, paper, demo, status, index } = Astro.props;
+
+const statusLabels: Record<string, string> = {
+  completed: 'Concluído',
+  published: 'Publicado',
+  'in-progress': 'Em andamento',
+};
+
+const num = String(index + 1).padStart(2, '0');
+---
+
+<article class="project-card">
+  <div class="project-card__number">[{num}]</div>
+
+  <div class="project-card__header">
+    <a href={`/projects/${slug}`} class="project-card__title">{title}</a>
+    <span class={`status status--${status}`}>{statusLabels[status] ?? status}</span>
+  </div>
+
+  <p class="project-card__desc">{description}</p>
+
+  <div class="project-card__result">{mainResult}</div>
+
+  <div class="tags">
+    {technologies.slice(0, 5).map((tech) => (
+      <span class="tag">{tech}</span>
+    ))}
+    {technologies.length > 5 && (
+      <span class="tag">+{technologies.length - 5}</span>
+    )}
+  </div>
+
+  <div class="project-card__footer">
+    <div class="project-card__links">
+      <a href={`/projects/${slug}`} class="btn btn--primary">Ver detalhes</a>
+      {github && (
+        <a href={github} target="_blank" rel="noopener" class="btn btn--ghost">
+          GitHub
+        </a>
+      )}
+      {demo && (
+        <a href={demo} target="_blank" rel="noopener" class="btn btn--outline">
+          Demo
+        </a>
+      )}
+    </div>
+    <span class="project-card__date">{date}</span>
+  </div>
+</article>

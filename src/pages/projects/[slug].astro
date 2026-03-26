@@ -1,0 +1,98 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+
+const statusLabels: Record<string, string> = {
+  completed: 'Concluído',
+  published: 'Publicado',
+  'in-progress': 'Em andamento',
+};
+---
+
+<BaseLayout
+  title={`${project.data.title} — Felipe Tome Pereira`}
+  description={project.data.description}
+>
+  <div class="project-page">
+    <div class="container">
+      <a href="/" class="project-page__back">← Voltar ao portfólio</a>
+
+      <!-- Metadata box -->
+      <div class="project-page__meta">
+        <div class="project-page__meta-grid">
+          <div>
+            <label>Status</label>
+            <span class={`status status--${project.data.status}`}>
+              {statusLabels[project.data.status] ?? project.data.status}
+            </span>
+          </div>
+          <div>
+            <label>Data</label>
+            <span style="font-family: var(--font-mono); font-size: 0.85rem;">
+              {project.data.date}
+            </span>
+          </div>
+          <div>
+            <label>Tecnologias</label>
+            <div class="tags" style="margin-top:0.25rem">
+              {project.data.technologies.map((t) => (
+                <span class="tag">{t}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <h1 style="margin-bottom: 1rem; font-size: 1.6rem; line-height: 1.25;">
+        {project.data.title}
+      </h1>
+
+      <!-- Abstract -->
+      <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.8; margin-bottom: 1.25rem;">
+        {project.data.description}
+      </p>
+
+      <!-- Main result callout -->
+      <div class="project-page__result">
+        <strong>Resultado Principal</strong>
+        {project.data.mainResult}
+      </div>
+
+      <!-- Links -->
+      <div class="project-page__links">
+        {project.data.github && (
+          <a href={project.data.github} target="_blank" rel="noopener" class="btn btn--outline">
+            Ver no GitHub
+          </a>
+        )}
+        {project.data.paper && (
+          <a href={project.data.paper} target="_blank" rel="noopener" class="btn btn--primary">
+            Paper / Artigo
+          </a>
+        )}
+        {project.data.demo && (
+          <a href={project.data.demo} target="_blank" rel="noopener" class="btn btn--ghost">
+            Demo ao vivo
+          </a>
+        )}
+      </div>
+
+      <!-- Markdown body -->
+      <div class="project-page__body">
+        <Content />
+      </div>
+    </div>
+  </div>
+</BaseLayout>
