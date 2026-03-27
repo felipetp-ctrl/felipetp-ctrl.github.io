@@ -12,10 +12,10 @@ const projects = allProjects.sort((a, b) => a.data.order - b.data.order);
   <!-- ── Hero ── -->
   <section class="hero">
     <div class="container--wide">
-      <p class="hero__label">// portfólio de pesquisa</p>
+      <p class="hero__label" data-i18n="hero.label">// portfólio de pesquisa</p>
       <h1 class="hero__name">Felipe Tomé Pereira</h1>
       <p class="hero__role">Data Science Enthusiast</p>
-      <p class="hero__bio">
+      <p class="hero__bio" data-i18n="hero.bio">
         Estudante apaixonado por machine learning, estatística e bancos de dados.
         Busco aprender e aprofundar continuamente nesses temas, seja reimplementando
         papers, explorando datasets ou construindo pipelines do zero. Cada projeto
@@ -29,7 +29,7 @@ const projects = allProjects.sort((a, b) => a.data.order - b.data.order);
         <a href="https://linkedin.com/in/felipetpereira" target="_blank" rel="noopener" class="btn btn--outline">
           LinkedIn
         </a>
-        <a href="mailto:felipetpereira1@gmail.com" class="btn btn--ghost">
+        <a href="mailto:felipetpereira1@gmail.com" class="btn btn--ghost" data-i18n="hero.contact">
           Contato
         </a>
       </div>
@@ -40,17 +40,20 @@ const projects = allProjects.sort((a, b) => a.data.order - b.data.order);
   <section class="projects-section" id="projects">
     <div class="container--wide">
       <div class="section-header">
-        <span class="section-title">Projetos</span>
-        <span class="section-count">{projects.length} trabalhos</span>
+        <span class="section-title" data-i18n="projects.title">Projetos</span>
+        <span class="section-count">{projects.length} <span data-i18n="projects.works">trabalhos</span></span>
       </div>
 
       <div class="projects-grid">
         {projects.map((project, i) => (
           <ProjectCard
             title={project.data.title}
+            titleEn={project.data.titleEn}
             description={project.data.description}
+            descriptionEn={project.data.descriptionEn}
             technologies={project.data.technologies}
             mainResult={project.data.mainResult}
+            mainResultEn={project.data.mainResultEn}
             date={project.data.date}
             slug={project.id}
             github={project.data.github}

@@ -5,9 +5,12 @@ const projects = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/projects' }),
   schema: z.object({
     title: z.string(),
+    titleEn: z.string().optional(),
     description: z.string(),
+    descriptionEn: z.string().optional(),
     technologies: z.array(z.string()),
     mainResult: z.string(),
+    mainResultEn: z.string().optional(),
     date: z.string(),
     github: z.string().optional(),
     paper: z.string().optional(),

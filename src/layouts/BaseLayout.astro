@@ -19,6 +19,92 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <script is:inline>
+      // ── 1. Theme early detection (must run before paint to prevent flash) ──
+      (function () {
+        var saved = null;
+        try { saved = localStorage.getItem('theme'); } catch (e) {}
+        if (!saved) {
+          var hour = new Date().getHours();
+          var isNight = hour >= 18 || hour < 6;
+          var prefDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          saved = (isNight || prefDark) ? 'dark' : 'light';
+        }
+        if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+      })();
+
+      // ── 2. i18n engine ──
+      window.__i18n = (function () {
+        var LANG_KEY = 'lang';
+        var UI = {
+          pt: {
+            'nav.projects': 'Projetos',
+            'nav.activity': 'Atividade',
+            'hero.label': '// portfólio de pesquisa',
+            'hero.bio': 'Estudante apaixonado por machine learning, estatística e bancos de dados. Busco aprender e aprofundar continuamente nesses temas, seja reimplementando papers, explorando datasets ou construindo pipelines do zero. Cada projeto é uma oportunidade de entender melhor como os dados se transformam em conhecimento.',
+            'hero.contact': 'Contato',
+            'projects.title': 'Projetos',
+            'projects.works': 'trabalhos',
+            'card.view-details': 'Ver detalhes',
+            'tag.study': 'estudo',
+            'heatmap.title': 'Atividade de commits',
+            'heatmap.subtitle': 'últimos 12 meses · GitHub',
+            'heatmap.less': 'Menos',
+            'heatmap.more': 'Mais',
+            'heatmap.stat.total': 'Commits totais',
+            'heatmap.stat.streak': 'Maior sequência',
+            'heatmap.stat.peak': 'Pico diário',
+            'heatmap.stat.active': 'Dias ativos',
+            'heatmap.months': ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
+            'heatmap.days': ['Dom','','Ter','','Qui','','Sáb'],
+            'heatmap.error': 'Não foi possível carregar os dados de contribuição do GitHub.',
+            'heatmap.error.sub': 'Verifique se o perfil <strong>{u}</strong> é público.',
+            'project.back': '← Voltar ao portfólio',
+            'project.date-label': 'Data',
+            'project.technologies-label': 'Tecnologias',
+            'project.main-result': 'Resultado Principal',
+            'project.view-github': 'Ver no GitHub',
+            'project.paper': 'Paper / Artigo',
+            'project.demo': 'Demo ao vivo',
+          },
+          en: {
+            'nav.projects': 'Projects',
+            'nav.activity': 'Activity',
+            'hero.label': '// research portfolio',
+            'hero.bio': 'Student passionate about machine learning, statistics and databases. I continuously seek to learn and deepen my knowledge in these areas, whether by reimplementing papers, exploring datasets, or building pipelines from scratch. Each project is an opportunity to better understand how data transforms into knowledge.',
+            'hero.contact': 'Contact',
+            'projects.title': 'Projects',
+            'projects.works': 'works',
+            'card.view-details': 'View details',
+            'tag.study': 'study',
+            'heatmap.title': 'Commit activity',
+            'heatmap.subtitle': 'last 12 months · GitHub',
+            'heatmap.less': 'Less',
+            'heatmap.more': 'More',
+            'heatmap.stat.total': 'Total commits',
+            'heatmap.stat.streak': 'Longest streak',
+            'heatmap.stat.peak': 'Daily peak',
+            'heatmap.stat.active': 'Active days',
+            'heatmap.months': ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+            'heatmap.days': ['Sun','','Tue','','Thu','','Sat'],
+            'heatmap.error': 'Could not load GitHub contribution data.',
+            'heatmap.error.sub': 'Check if profile <strong>{u}</strong> is public.',
+            'project.back': '← Back to portfolio',
+            'project.date-label': 'Date',
+            'project.technologies-label': 'Technologies',
+            'project.main-result': 'Main Result',
+            'project.view-github': 'View on GitHub',
+            'project.paper': 'Paper / Article',
+            'project.demo': 'Live Demo',
+          },
+        };
+        function getLang() {
+          try { return localStorage.getItem(LANG_KEY) || 'pt'; } catch (e) { return 'pt'; }
+        }
+        function t(key) { return UI[getLang()][key]; }
+        return { t: t, getLang: getLang, UI: UI };
+      })();
+    </script>
   </head>
   <body>
     <header class="site-header">
@@ -29,9 +115,26 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         <nav>
           <ul class="site-nav">
             <li><a href="/">Home</a></li>
-            <li><a href="/#projects">Projetos</a></li>
-            <li><a href="/#activity">Atividade</a></li>
+            <li><a href="/#projects" data-i18n="nav.projects">Projetos</a></li>
+            <li><a href="/#activity" data-i18n="nav.activity">Atividade</a></li>
           </ul>
+          <div class="header-controls">
+            <div class="lang-switcher" role="group" aria-label="Language">
+              <button class="lang-switcher__btn lang-switcher__btn--active" data-lang="pt">PT</button>
+              <button class="lang-switcher__btn" data-lang="en">EN</button>
+            </div>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+              <!-- Moon: visible in light mode, click to go dark -->
+              <svg class="theme-toggle__moon" width="13" height="13" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              </svg>
+              <!-- Sun: visible in dark mode, click to go light -->
+              <svg class="theme-toggle__sun" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+              </svg>
+            </button>
+          </div>
         </nav>
       </div>
     </header>
@@ -51,6 +154,76 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         </div>
       </div>
     </footer>
+
+    <script is:inline>
+      (function () {
+        // ── Lang ──
+        var LANG_KEY = 'lang';
+        function getLang() {
+          try { return localStorage.getItem(LANG_KEY) || 'pt'; } catch (e) { return 'pt'; }
+        }
+        function applyLang(lang) {
+          var UI = window.__i18n.UI;
+          document.documentElement.lang = lang === 'en' ? 'en' : 'pt-BR';
+          document.querySelectorAll('[data-i18n]').forEach(function (el) {
+            var val = UI[lang][el.dataset.i18n];
+            if (val !== undefined && typeof val === 'string') el.textContent = val;
+          });
+          document.querySelectorAll('[data-i18n-en]').forEach(function (el) {
+            el.textContent = lang === 'en' ? el.dataset.i18nEn : (el.dataset.i18nPt || el.textContent);
+          });
+          document.querySelectorAll('[data-body-lang]').forEach(function (el) {
+            el.style.display = el.dataset.bodyLang === lang ? '' : 'none';
+          });
+          document.querySelectorAll('.lang-switcher__btn').forEach(function (btn) {
+            btn.classList.toggle('lang-switcher__btn--active', btn.dataset.lang === lang);
+          });
+        }
+        applyLang(getLang());
+        document.querySelectorAll('.lang-switcher__btn').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var next = btn.dataset.lang;
+            try { localStorage.setItem(LANG_KEY, next); } catch (e) {}
+            applyLang(next);
+            document.dispatchEvent(new CustomEvent('langchange', { detail: { lang: next } }));
+          });
+        });
+
+        // ── Theme ──
+        function getAutoTheme() {
+          var hour = new Date().getHours();
+          var isNight = hour >= 18 || hour < 6;
+          var prefDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          return (isNight || prefDark) ? 'dark' : 'light';
+        }
+        function applyTheme(theme) {
+          document.documentElement.classList.add('theme-transitioning');
+          if (theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          } else {
+            document.documentElement.removeAttribute('data-theme');
+          }
+          setTimeout(function () {
+            document.documentElement.classList.remove('theme-transitioning');
+          }, 300);
+        }
+        var themeBtn = document.getElementById('theme-toggle');
+        if (themeBtn) {
+          themeBtn.addEventListener('click', function () {
+            var current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+            var next = current === 'dark' ? 'light' : 'dark';
+            try { localStorage.setItem('theme', next); } catch (e) {}
+            applyTheme(next);
+          });
+        }
+        // Auto-update theme every minute if user has no saved preference
+        setInterval(function () {
+          var saved = null;
+          try { saved = localStorage.getItem('theme'); } catch (e) {}
+          if (!saved) applyTheme(getAutoTheme());
+        }, 60000);
+      })();
+    </script>
   </body>
 </html>
 

@@ -1,9 +1,12 @@
 ---
 interface Props {
   title: string;
+  titleEn?: string;
   description: string;
+  descriptionEn?: string;
   technologies: string[];
   mainResult: string;
+  mainResultEn?: string;
   date: string;
   slug: string;
   github?: string;
@@ -14,12 +17,18 @@ interface Props {
   index: number;
 }
 
-const { title, description, technologies, mainResult, date, slug, github, paper, demo, status, study, index } = Astro.props;
+const { title, titleEn, description, descriptionEn, technologies, mainResult, mainResultEn, date, slug, github, paper, demo, status, study, index } = Astro.props;
 
 const statusLabels: Record<string, string> = {
   completed: 'Concluído',
   published: 'Publicado',
   'in-progress': 'Em andamento',
+};
+
+const statusLabelsEn: Record<string, string> = {
+  completed: 'Completed',
+  published: 'Published',
+  'in-progress': 'In Progress',
 };
 
 const num = String(index + 1).padStart(2, '0');
@@ -29,16 +38,29 @@ const num = String(index + 1).padStart(2, '0');
   <div class="project-card__number">[{num}]</div>
 
   <div class="project-card__header">
-    <a href={`/projects/${slug}`} class="project-card__title">{title}</a>
+    <a href={`/projects/${slug}`} class="project-card__title"
+      data-i18n-pt={title}
+      data-i18n-en={titleEn || title}
+    >{title}</a>
     <div style="display:flex; gap:0.4rem; align-items:center; flex-shrink:0;">
-      {study && <span class="tag tag--study">estudo</span>}
-      <span class={`status status--${status}`}>{statusLabels[status] ?? status}</span>
+      {study && <span class="tag tag--study" data-i18n="tag.study">estudo</span>}
+      <span
+        class={`status status--${status}`}
+        data-i18n-pt={statusLabels[status] ?? status}
+        data-i18n-en={statusLabelsEn[status] ?? status}
+      >{statusLabels[status] ?? status}</span>
     </div>
   </div>
 
-  <p class="project-card__desc">{description}</p>
+  <p class="project-card__desc"
+    data-i18n-pt={description}
+    data-i18n-en={descriptionEn || description}
+  >{description}</p>
 
-  <div class="project-card__result">{mainResult}</div>
+  <div class="project-card__result"
+    data-i18n-pt={mainResult}
+    data-i18n-en={mainResultEn || mainResult}
+  >{mainResult}</div>
 
   <div class="tags">
     {technologies.slice(0, 5).map((tech) => (
@@ -51,7 +73,7 @@ const num = String(index + 1).padStart(2, '0');
 
   <div class="project-card__footer">
     <div class="project-card__links">
-      <a href={`/projects/${slug}`} class="btn btn--primary">Ver detalhes</a>
+      <a href={`/projects/${slug}`} class="btn btn--primary" data-i18n="card.view-details">Ver detalhes</a>
       {github && (
         <a href={github} target="_blank" rel="noopener" class="btn btn--ghost">
           GitHub

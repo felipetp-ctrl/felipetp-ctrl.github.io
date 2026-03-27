@@ -1,14 +1,19 @@
 ---
 title: "Regressão Linear Múltipla para Preço de Carros"
+titleEn: "Multiple Linear Regression for Car Price Prediction"
 description: "Primeira implementação de regressão linear múltipla para estimar preços de carros com base em marca, carroceria, motor, quilometragem e ano. Pipeline completo: EDA, tratamento de outliers, transformação logarítmica e interpretação de coeficientes."
+descriptionEn: "First implementation of multiple linear regression to estimate car prices based on brand, body type, engine, mileage and year. Complete pipeline: EDA, outlier treatment, logarithmic transformation and coefficient interpretation."
 technologies: ["Python", "scikit-learn", "statsmodels", "Pandas", "NumPy", "Matplotlib", "Jupyter Notebook"]
 mainResult: "R² de 0.773 no teste com preço em escala log. Breusch-Pagan p = 3.2e-6 evidencia heteroscedasticidade residual."
+mainResultEn: "R² of 0.773 on test set with log-scaled price. Breusch-Pagan p = 3.2e-6 evidences residual heteroscedasticity."
 date: "2025-11"
 github: "https://github.com/felipetp-ctrl/multi-linear-regression-car-prices"
 featured: false
 status: "completed"
 order: 4
 ---
+
+<div data-body-lang="pt">
 
 ## Objetivos
 
@@ -80,3 +85,80 @@ cd multi-linear-regression-car-prices
 pip install -r requirements.txt
 python src/linear_regression.py
 ```
+
+</div>
+
+<div data-body-lang="en" style="display:none">
+
+## Objectives
+
+- Explore the data and understand which variables most affect the price
+- Apply data cleaning and outlier treatment
+- Transform price to log scale and interpret coefficients as approximate percentage changes
+- Train, evaluate and interpret the model
+- Document insights and next steps
+
+## Dataset
+
+File from the **365 Data Science Bootcamp**, with vehicle records containing attributes such as brand, body type, engine power (`EngineV`), mileage (`Mileage`) and manufacturing year (`Year`). Data included in `data/raw/`.
+
+## Repository Structure
+
+```
+src/
+  linear_regression.py   # Main script
+notebooks/
+  exploratory.ipynb      # EDA
+reports/
+  figures/               # Generated plots
+  model_summary.md       # OLS summary (statsmodels)
+data/
+  raw/                   # Original data
+```
+
+## Pipeline
+
+1. **Load data**, `src/linear_regression.py`
+2. **Cleaning**, remove nulls and outliers in `Price`, `Mileage`, `EngineV`, `Year`
+3. **Transformation**, log of price to linearize relationships, dummies for categoricals
+4. **Multicollinearity**, VIF calculated, `Year` removed due to high correlation with `Mileage`
+5. **Training**, `LinearRegression` from scikit-learn
+6. **Evaluation**, R², MAE and RMSE in original space (`exp` of log), residual plots
+7. **Interpretation**, coefficients converted to approximate %, statistical summary via statsmodels
+
+## Results
+
+| Metric | Value (test) |
+|---|---|
+| R² | **0.7727** |
+| RMSE | 0.4298 |
+| MAE | 0.3157 |
+
+> RMSE and MAE reported in original space after `exp(log_price)`.
+
+**Breusch-Pagan test:** p-value = 3.2e-6, rejects homoscedasticity. Residual variance is not constant, expected for price data with wide range.
+
+## Main Questions Answered
+
+- What is the approximate percentage effect of brand on price, controlling for other factors?
+- What is the depreciation associated with mileage?
+- What is the "premium" for a larger engine (`EngineV`)?
+- Does registration (yes/no) add value?
+
+## Next Steps
+
+- Add cross-validation
+- Test Ridge/Lasso for regularization
+- Compare with tree-based models (Random Forest, XGBoost)
+- Calculate confidence intervals for coefficients
+
+## Reproduction
+
+```bash
+git clone https://github.com/felipetp-ctrl/multi-linear-regression-car-prices.git
+cd multi-linear-regression-car-prices
+pip install -r requirements.txt
+python src/linear_regression.py
+```
+
+</div>
