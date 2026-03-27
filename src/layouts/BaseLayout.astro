@@ -15,6 +15,14 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Felipe Tomé Pereira" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -66,6 +74,9 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
             'project.view-github': 'Ver no GitHub',
             'project.paper': 'Paper / Artigo',
             'project.demo': 'Demo ao vivo',
+            '404.title': 'Página não encontrada',
+            '404.message': 'Essa página não existe ou foi movida.',
+            '404.back': 'Voltar ao início',
           },
           en: {
             'nav.projects': 'Projects',
@@ -96,6 +107,9 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
             'project.view-github': 'View on GitHub',
             'project.paper': 'Paper / Article',
             'project.demo': 'Live Demo',
+            '404.title': 'Page not found',
+            '404.message': "This page doesn't exist or was moved.",
+            '404.back': 'Back to home',
           },
         };
         function getLang() {

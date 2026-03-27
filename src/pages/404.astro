@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="404 — Felipe Tomé Pereira" description="Página não encontrada">
+  <div class="not-found">
+    <div class="container">
+      <p class="not-found__code">404</p>
+      <h1 class="not-found__title" data-i18n="404.title">Página não encontrada</h1>
+      <p class="not-found__message" data-i18n="404.message">
+        Essa página não existe ou foi movida.
+      </p>
+      <a href="/" class="btn btn--primary" data-i18n="404.back">Voltar ao início</a>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .not-found {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+  }
+  .not-found__code {
+    font-family: var(--font-mono);
+    font-size: 5rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin: 0 0 0.5rem;
+  }
+  .not-found__title {
+    font-size: 1.5rem;
+    margin: 0 0 0.75rem;
+  }
+  .not-found__message {
+    color: var(--text-muted);
+    margin: 0 0 2rem;
+  }
+</style>
