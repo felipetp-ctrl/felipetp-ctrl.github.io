@@ -11,7 +11,7 @@ github: "https://github.com/felipetp-ctrl/homl-deep-learning-ensemble-unsupervis
 featured: false
 status: "completed"
 study: true
-order: 3
+order: 4
 ---
 
 <div data-body-lang="pt">
