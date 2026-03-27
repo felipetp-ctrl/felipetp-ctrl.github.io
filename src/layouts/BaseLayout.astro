@@ -124,20 +124,33 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
               <button class="lang-switcher__btn" data-lang="en">EN</button>
             </div>
             <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
-              <!-- Moon: visible in light mode, click to go dark -->
               <svg class="theme-toggle__moon" width="13" height="13" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
               </svg>
-              <!-- Sun: visible in dark mode, click to go light -->
               <svg class="theme-toggle__sun" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <circle cx="12" cy="12" r="4"/>
                 <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
               </svg>
             </button>
+            <!-- Hamburger: mobile only -->
+            <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-label="Menu">
+              <span class="nav-toggle__bar"></span>
+              <span class="nav-toggle__bar"></span>
+              <span class="nav-toggle__bar"></span>
+            </button>
           </div>
         </nav>
       </div>
+      <!-- Mobile dropdown menu -->
+      <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/#projects" data-i18n="nav.projects">Projetos</a></li>
+          <li><a href="/#activity" data-i18n="nav.activity">Atividade</a></li>
+        </ul>
+      </div>
     </header>
+
 
     <main>
       <slot />
@@ -222,6 +235,34 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
           try { saved = localStorage.getItem('theme'); } catch (e) {}
           if (!saved) applyTheme(getAutoTheme());
         }, 60000);
+
+        // ── Hamburger menu ──
+        var navToggle = document.getElementById('nav-toggle');
+        var mobileMenu = document.getElementById('mobile-menu');
+        var siteHeader = document.querySelector('.site-header');
+        if (navToggle && siteHeader) {
+          navToggle.addEventListener('click', function () {
+            var open = siteHeader.classList.toggle('nav-open');
+            navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (mobileMenu) mobileMenu.setAttribute('aria-hidden', open ? 'false' : 'true');
+          });
+          // Close on mobile nav link click
+          document.querySelectorAll('.mobile-menu a').forEach(function (link) {
+            link.addEventListener('click', function () {
+              siteHeader.classList.remove('nav-open');
+              navToggle.setAttribute('aria-expanded', 'false');
+              if (mobileMenu) mobileMenu.setAttribute('aria-hidden', 'true');
+            });
+          });
+          // Close when clicking outside the header
+          document.addEventListener('click', function (e) {
+            if (siteHeader.classList.contains('nav-open') && !siteHeader.contains(e.target)) {
+              siteHeader.classList.remove('nav-open');
+              navToggle.setAttribute('aria-expanded', 'false');
+              if (mobileMenu) mobileMenu.setAttribute('aria-hidden', 'true');
+            }
+          });
+        }
       })();
     </script>
   </body>
