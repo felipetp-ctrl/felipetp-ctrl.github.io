@@ -5,20 +5,44 @@ interface Props {
   title: string;
   description?: string;
   ogImage?: string;
+  locale?: 'pt' | 'en';
 }
 
-const { title, description = 'ML Research Portfolio — Felipe Tomé Pereira', ogImage = '/og/index.png' } = Astro.props;
+const { title, description = 'ML Research Portfolio — Felipe Tome Pereira', ogImage, locale } = Astro.props;
+const pathParts = Astro.url.pathname.split('/').filter(Boolean);
+const pathLocale = pathParts[0] === 'pt' || pathParts[0] === 'en' ? (pathParts[0] as 'pt' | 'en') : undefined;
+const currentLocale = locale ?? pathLocale ?? 'pt';
+const localePrefix = currentLocale ? `/${currentLocale}` : '';
+
+const localizedDefaultOgImage = currentLocale ? `/og/${currentLocale}/index.png` : '/og/index.png';
+const effectiveOgImage = ogImage ?? localizedDefaultOgImage;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const ogImageURL = new URL(ogImage, Astro.site);
+const ogImageURL = new URL(effectiveOgImage, Astro.site);
+
+const canonicalPath = Astro.url.pathname;
+const pathWithoutLocale = pathLocale
+  ? `/${pathParts.slice(1).join('/')}`
+  : canonicalPath;
+const normalizedPathWithoutLocale = pathWithoutLocale === '/' ? '/' : pathWithoutLocale.replace(/\/$/, '');
+const ptHref = new URL(`/pt${normalizedPathWithoutLocale === '/' ? '/' : normalizedPathWithoutLocale}`, Astro.site);
+const enHref = new URL(`/en${normalizedPathWithoutLocale === '/' ? '/' : normalizedPathWithoutLocale}`, Astro.site);
+
+function withLocale(path: string): string {
+  if (!path.startsWith('/')) return `${localePrefix}/${path}`;
+  return `${localePrefix}${path}`;
+}
 ---
 
 <!doctype html>
-<html lang="pt-BR">
+<html lang={currentLocale === 'en' ? 'en' : 'pt-BR'}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
+    <link rel="alternate" hreflang="pt-BR" href={ptHref} />
+    <link rel="alternate" hreflang="en" href={enHref} />
+    <link rel="alternate" hreflang="x-default" href={ptHref} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalURL} />
@@ -53,6 +77,10 @@ const ogImageURL = new URL(ogImage, Astro.site);
       // ── 2. i18n engine ──
       window.__i18n = (function () {
         var LANG_KEY = 'lang';
+        var PATH_LANG = (function () {
+          var m = window.location.pathname.match(/^\/(pt|en)(\/|$)/);
+          return m ? m[1] : null;
+        })();
         var UI = {
           pt: {
             'nav.projects': 'Projetos',
@@ -154,6 +182,7 @@ const ogImageURL = new URL(ogImage, Astro.site);
           },
         };
         function getLang() {
+          if (PATH_LANG) return PATH_LANG;
           try { return localStorage.getItem(LANG_KEY) || 'pt'; } catch (e) { return 'pt'; }
         }
         function t(key) { return UI[getLang()][key]; }
@@ -164,16 +193,16 @@ const ogImageURL = new URL(ogImage, Astro.site);
   <body>
     <header class="site-header">
       <div class="site-header__inner">
-        <a href="/" class="site-header__logo">
+        <a href={withLocale('/')} class="site-header__logo">
           <span>~/</span>felipetp
         </a>
         <nav>
           <ul class="site-nav">
-            <li><a href="/">Home</a></li>
-            <li><a href="/#projects" data-i18n="nav.projects">Projetos</a></li>
-            <li><a href="/#activity" data-i18n="nav.activity">Atividade</a></li>
-            <li><a href="/about" data-i18n="nav.about">Sobre</a></li>
-            <li><a href="/blog" data-i18n="nav.blog">Blog</a></li>
+            <li><a href={withLocale('/')}>Home</a></li>
+            <li><a href={withLocale('/#projects')} data-i18n="nav.projects">Projetos</a></li>
+            <li><a href={withLocale('/#activity')} data-i18n="nav.activity">Atividade</a></li>
+            <li><a href={withLocale('/about')} data-i18n="nav.about">Sobre</a></li>
+            <li><a href={withLocale('/blog')} data-i18n="nav.blog">Blog</a></li>
           </ul>
           <div class="header-controls">
             <div class="lang-switcher" role="group" aria-label="Language">
@@ -201,11 +230,11 @@ const ogImageURL = new URL(ogImage, Astro.site);
       <!-- Mobile dropdown menu -->
       <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
         <ul>
-          <li><a href="/">Home</a></li>
-          <li><a href="/#projects" data-i18n="nav.projects">Projetos</a></li>
-          <li><a href="/#activity" data-i18n="nav.activity">Atividade</a></li>
-          <li><a href="/about" data-i18n="nav.about">Sobre</a></li>
-          <li><a href="/blog" data-i18n="nav.blog">Blog</a></li>
+          <li><a href={withLocale('/')}>Home</a></li>
+          <li><a href={withLocale('/#projects')} data-i18n="nav.projects">Projetos</a></li>
+          <li><a href={withLocale('/#activity')} data-i18n="nav.activity">Atividade</a></li>
+          <li><a href={withLocale('/about')} data-i18n="nav.about">Sobre</a></li>
+          <li><a href={withLocale('/blog')} data-i18n="nav.blog">Blog</a></li>
         </ul>
       </div>
     </header>
@@ -232,6 +261,8 @@ const ogImageURL = new URL(ogImage, Astro.site);
         var LANG_KEY = 'lang';
 
         function getLang() {
+          var m = window.location.pathname.match(/^\/(pt|en)(\/|$)/);
+          if (m) return m[1];
           try { return localStorage.getItem(LANG_KEY) || 'pt'; } catch (e) { return 'pt'; }
         }
 
@@ -256,6 +287,14 @@ const ogImageURL = new URL(ogImage, Astro.site);
           });
         }
 
+        function localePath(pathname, nextLang) {
+          if (pathname === '/') return '/' + nextLang + '/';
+          if (/^\/(pt|en)(\/|$)/.test(pathname)) {
+            return pathname.replace(/^\/(pt|en)(?=\/|$)/, '/' + nextLang);
+          }
+          return '/' + nextLang + (pathname.startsWith('/') ? pathname : '/' + pathname);
+        }
+
         function getAutoTheme() {
           var hour = new Date().getHours();
           var prefDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -277,6 +316,17 @@ const ogImageURL = new URL(ogImage, Astro.site);
         // Apply lang immediately to prevent flash on first load
         applyLang(getLang());
 
+        // Redirect root to locale-specific entry.
+        if (window.location.pathname === '/') {
+          var browserLang = (navigator.language || '').toLowerCase();
+          if (browserLang.indexOf('en') === 0) {
+            window.location.replace('/en/');
+          } else {
+            window.location.replace('/pt/');
+          }
+          return;
+        }
+
         // ── Event delegation — survives View Transitions DOM swaps ──
         document.addEventListener('click', function (e) {
           // Lang switcher
@@ -284,6 +334,12 @@ const ogImageURL = new URL(ogImage, Astro.site);
           if (langBtn) {
             var nextLang = langBtn.dataset.lang;
             try { localStorage.setItem(LANG_KEY, nextLang); } catch (ex) {}
+            var currentLang = getLang();
+            if (nextLang !== currentLang) {
+              var nextPath = localePath(window.location.pathname, nextLang);
+              window.location.assign(nextPath + window.location.search + window.location.hash);
+              return;
+            }
             applyLang(nextLang);
             document.dispatchEvent(new CustomEvent('langchange', { detail: { lang: nextLang } }));
             return;

@@ -1,0 +1,127 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const locales = ['pt', 'en'] as const;
+  const projects = await getCollection('projects');
+  return projects.flatMap((project) =>
+    locales.map((locale) => ({
+      params: { locale, slug: project.id },
+      props: { project, locale },
+    })),
+  );
+}
+
+const { project, locale } = Astro.props as { project: any; locale: 'pt' | 'en' };
+const { Content, headings } = await render(project);
+
+const statusLabels: Record<string, string> = {
+  completed: 'Concluído',
+  published: 'Publicado',
+  'in-progress': 'Em andamento',
+};
+
+const statusLabelsEn: Record<string, string> = {
+  completed: 'Completed',
+  published: 'Published',
+  'in-progress': 'In Progress',
+};
+---
+
+<BaseLayout
+  title={`${project.data.title} — Felipe Tomé Pereira | ML Research`}
+  description={project.data.description}
+  ogImage={`/og/${locale}/${project.id}.png`}
+  locale={locale}
+>
+  <div class="project-page">
+    <div class="container">
+      <a href={`/${locale}/`} class="project-page__back" data-i18n="project.back">← Voltar ao portfólio</a>
+
+      <!-- Metadata box -->
+      <div class="project-page__meta">
+        <div class="project-page__meta-grid">
+          <div>
+            <label>Status</label>
+            <span
+              class={`status status--${project.data.status}`}
+              data-i18n-pt={statusLabels[project.data.status] ?? project.data.status}
+              data-i18n-en={statusLabelsEn[project.data.status] ?? project.data.status}
+            >
+              {statusLabels[project.data.status] ?? project.data.status}
+            </span>
+          </div>
+          <div>
+            <label data-i18n="project.date-label">Data</label>
+            <span style="font-family: var(--font-mono); font-size: 0.85rem;">
+              {project.data.date}
+            </span>
+          </div>
+          <div>
+            <label data-i18n="project.technologies-label">Tecnologias</label>
+            <div class="tags" style="margin-top:0.25rem">
+              {project.data.technologies.map((t) => (
+                <span class="tag">{t}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <h1 style="margin-bottom: 1rem; font-size: 1.6rem; line-height: 1.25;"
+        transition:name={`project-title-${project.id}`}
+        data-i18n-pt={project.data.title}
+        data-i18n-en={project.data.titleEn || project.data.title}
+      >
+        {project.data.title}
+      </h1>
+
+      <!-- Abstract -->
+      <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.8; margin-bottom: 1.25rem;"
+        data-i18n-pt={project.data.description}
+        data-i18n-en={project.data.descriptionEn || project.data.description}
+      >
+        {project.data.description}
+      </p>
+
+      <!-- Main result callout -->
+      <div class="project-page__result">
+        <strong data-i18n="project.main-result">Resultado Principal</strong>
+        <span
+          data-i18n-pt={project.data.mainResult}
+          data-i18n-en={project.data.mainResultEn || project.data.mainResult}
+        >{project.data.mainResult}</span>
+      </div>
+
+      <!-- Links -->
+      <div class="project-page__links">
+        {project.data.github && (
+          <a href={project.data.github} target="_blank" rel="noopener" class="btn btn--outline" data-i18n="project.view-github">
+            Ver no GitHub
+          </a>
+        )}
+        {project.data.paper && (
+          <a href={project.data.paper} target="_blank" rel="noopener" class="btn btn--primary" data-i18n="project.paper">
+            Paper / Artigo
+          </a>
+        )}
+        {project.data.demo && (
+          <a href={project.data.demo} target="_blank" rel="noopener" class="btn btn--ghost" data-i18n="project.demo">
+            Demo ao vivo
+          </a>
+        )}
+      </div>
+    </div>
+
+    <!-- Markdown body + TOC -->
+    <div class="project-body-wrap">
+      <div class="project-page__body">
+        <Content />
+      </div>
+      <TableOfContents headings={headings} />
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,301 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  return [{ params: { locale: 'pt' } }, { params: { locale: 'en' } }];
+}
+
+const { locale } = Astro.params as { locale: 'pt' | 'en' };
+
+const skillGroups = [
+  {
+    labelPt: 'Linguagens & Dados',
+    labelEn: 'Languages & Data',
+    techs: ['Python', 'SQL', 'DAX', 'Pandas'],
+  },
+  {
+    labelPt: 'Machine Learning',
+    labelEn: 'Machine Learning',
+    techs: ['scikit-learn', 'PyTorch', 'PyTorch Geometric', 'Feature Engineering', 'Detecção de Anomalias'],
+  },
+  {
+    labelPt: 'Deep Learning',
+    labelEn: 'Deep Learning',
+    techs: ['Graph Neural Networks', 'EdgeConv', 'Autoencoders', 'SimCLR', 'NT-Xent'],
+  },
+  {
+    labelPt: 'Analytics & Engenharia',
+    labelEn: 'Analytics & Engineering',
+    techs: ['ETL', 'Power BI', 'Streamlit', 'Matplotlib', 'KPIs'],
+  },
+  {
+    labelPt: 'LLMs & RAG',
+    labelEn: 'LLMs & RAG',
+    techs: ['LlamaIndex', 'Google Gemini API', 'RAG', 'ReAct'],
+  },
+  {
+    labelPt: 'Cloud & Ferramentas',
+    labelEn: 'Cloud & Tools',
+    techs: ['Microsoft Azure', 'Oracle Cloud', 'Docker', 'Git/GitHub'],
+  },
+];
+---
+
+<BaseLayout
+  title="Sobre — Felipe Tomé Pereira"
+  description="Analista de Dados com mais de 2 anos de experiência em analytics, ML pipelines, ETL e SQL. Projetos em Graph Neural Networks, aprendizado contrastivo e LLMs."
+  ogImage={`/og/${locale}/about.png`}
+  locale={locale}
+>
+  <div class="about-page">
+    <div class="container">
+
+      <!-- ── Header ── -->
+      <header class="about-header">
+        <h1 class="about-header__name">Felipe Tomé Pereira</h1>
+        <p class="about-header__role"
+          data-i18n-pt="Analista de Dados · Votorantim CoE · Curitiba, PR"
+          data-i18n-en="Data Analyst · Votorantim CoE · Curitiba, PR"
+        >Analista de Dados · Votorantim CoE · Curitiba, PR</p>
+      </header>
+
+      <!-- ── Resumo ── -->
+      <section class="about-section">
+        <h2 data-i18n="about.bio-title">Resumo</h2>
+        <div data-body-lang="pt">
+          <p>
+            Analista de Dados com mais de 2 anos de experiência em analytics, pipelines de Machine
+            Learning, ETL, SQL e construção de indicadores para suporte à decisão em ambiente
+            corporativo. Atua com modelagem, validação e monitoramento de dados, com interesse em
+            ML aplicado, análise de risco, detecção de padrões atípicos e problemas analíticos de
+            alta escala.
+          </p>
+          <p>
+            Desenvolve paralelamente projetos em aprendizado não supervisionado, Graph Neural
+            Networks e aprendizado contrastivo, com foco em representação de dados complexos e
+            identificação de comportamentos não triviais.
+          </p>
+        </div>
+        <div data-body-lang="en" style="display:none">
+          <p>
+            Data Analyst with over 2 years of experience in analytics, Machine Learning pipelines,
+            ETL, SQL and KPI development for decision support in corporate environments. Works with
+            data modeling, validation and monitoring, with interest in applied ML, risk analysis,
+            anomaly detection and high-scale analytical problems.
+          </p>
+          <p>
+            Concurrently develops projects in unsupervised learning, Graph Neural Networks and
+            contrastive learning, focusing on complex data representation and non-trivial pattern
+            identification.
+          </p>
+        </div>
+      </section>
+
+      <!-- ── Habilidades ── -->
+      <section class="about-section">
+        <h2 data-i18n="about.skills">Habilidades Técnicas</h2>
+        <div class="skills-grid">
+          {skillGroups.map(group => (
+            <div class="skill-group">
+              <p class="skill-group__label"
+                data-i18n-pt={group.labelPt}
+                data-i18n-en={group.labelEn}
+              >{group.labelPt}</p>
+              <div class="tags">
+                {group.techs.map(tech => (
+                  <span class="tag">{tech}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- ── Experiência ── -->
+      <section class="about-section">
+        <h2 data-i18n="about.experience">Experiência Profissional</h2>
+        <div class="timeline">
+
+          <!-- Votorantim — Pleno -->
+          <div class="timeline-item">
+            <div class="timeline-item__year">
+              <span data-i18n-pt="Jul. 2025 —" data-i18n-en="Jul. 2025 —">Jul. 2025 —</span><br />
+              <span data-i18n="about.present">Presente</span>
+            </div>
+            <div>
+              <p class="timeline-item__institution">Votorantim Center of Excellence</p>
+              <p class="timeline-item__course"
+                data-i18n-pt="Analista de Dados Pleno — Eficiência Operacional"
+                data-i18n-en="Senior Data Analyst — Operational Efficiency"
+              >Analista de Dados Pleno — Eficiência Operacional</p>
+              <div data-body-lang="pt">
+                <p class="timeline-item__desc">
+                  Desenvolvimento de pipeline de ML para previsão de tempo de testes no SAP (regressão linear com validação cruzada).
+                  Estruturação de indicadores financeiros e operacionais para monitoramento executivo.
+                  Implementação de rotinas ETL integrando Panaya e SAP para dashboards analíticos.
+                </p>
+              </div>
+              <div data-body-lang="en" style="display:none">
+                <p class="timeline-item__desc">
+                  Built end-to-end ML pipeline for SAP test time forecasting using cross-validated linear regression.
+                  Structured financial and operational KPIs for executive monitoring.
+                  Implemented ETL routines integrating Panaya and SAP for analytical dashboards.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Votorantim — Processos -->
+          <div class="timeline-item">
+            <div class="timeline-item__year">Mar. 2024 —<br />Jul. 2025</div>
+            <div>
+              <p class="timeline-item__institution">Votorantim Center of Excellence</p>
+              <p class="timeline-item__course"
+                data-i18n-pt="Analista de Processos e Melhoria"
+                data-i18n-en="Process & Improvement Analyst"
+              >Analista de Processos e Melhoria</p>
+              <div data-body-lang="pt">
+                <p class="timeline-item__desc">
+                  Liderança de automação e analytics com Microsoft Power Platform.
+                  Desenvolvimento de dashboards Power BI com backend SQL para acompanhamento de SLAs e performance operacional.
+                </p>
+              </div>
+              <div data-body-lang="en" style="display:none">
+                <p class="timeline-item__desc">
+                  Led automation and analytics initiatives using Microsoft Power Platform.
+                  Developed Power BI dashboards with SQL backend for SLA tracking and operational performance analysis.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Votorantim — Estágio -->
+          <div class="timeline-item">
+            <div class="timeline-item__year">Jul. 2023 —<br />Mar. 2024</div>
+            <div>
+              <p class="timeline-item__institution">Votorantim Center of Excellence</p>
+              <p class="timeline-item__course"
+                data-i18n-pt="Estagiário de Dados e Materiais"
+                data-i18n-en="Data & Materials Intern"
+              >Estagiário de Dados e Materiais</p>
+              <div data-body-lang="pt">
+                <p class="timeline-item__desc">
+                  Desenvolvimento de consultas SQL para extração, validação e padronização de dados no SAP,
+                  contribuindo para qualidade de dados, governança e suporte a auditorias internas.
+                </p>
+              </div>
+              <div data-body-lang="en" style="display:none">
+                <p class="timeline-item__desc">
+                  Developed SQL queries for data extraction, validation and standardization in SAP,
+                  supporting data quality, governance and internal audits.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ── Pesquisa ── -->
+      <section class="about-section">
+        <h2 data-i18n="about.research">Pesquisa</h2>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-item__year">
+              <span data-i18n-pt="Jan. 2026 —" data-i18n-en="Jan. 2026 —">Jan. 2026 —</span><br />
+              <span data-i18n="about.present">Presente</span>
+            </div>
+            <div>
+              <p class="timeline-item__institution">Programa UNIGOU Remote</p>
+              <p class="timeline-item__course"
+                data-i18n-pt="Pesquisador Colaborador — Colaboração Acadêmica Internacional"
+                data-i18n-en="Collaborative Researcher — International Academic Collaboration"
+              >Pesquisador Colaborador — Colaboração Acadêmica Internacional</p>
+              <div data-body-lang="pt">
+                <p class="timeline-item__desc">
+                  Pesquisa qualitativa internacional sobre interação humano-IA no trabalho do conhecimento,
+                  envolvendo entrevistas, análise temática e discussão sobre produtividade, cognição e uso
+                  responsável de sistemas inteligentes.
+                </p>
+              </div>
+              <div data-body-lang="en" style="display:none">
+                <p class="timeline-item__desc">
+                  International qualitative research on human-AI interaction in knowledge work,
+                  involving interviews, thematic analysis and discussion on productivity, cognition
+                  and responsible use of intelligent systems.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Formação ── -->
+      <section class="about-section">
+        <h2 data-i18n="about.education">Formação Acadêmica</h2>
+        <div class="timeline">
+
+          <div class="timeline-item">
+            <div class="timeline-item__year"
+              data-i18n-pt="Previsão: 2028"
+              data-i18n-en="Expected: 2028"
+            >Previsão: 2028</div>
+            <div>
+              <p class="timeline-item__institution">Pontifícia Universidade Católica do Paraná (PUCPR)</p>
+              <p class="timeline-item__course"
+                data-i18n-pt="Bacharelado em Administração de Empresas"
+                data-i18n-en="Bachelor's in Business Administration"
+              >Bacharelado em Administração de Empresas</p>
+              <p class="timeline-item__desc">Curitiba, Brasil</p>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-item__year">2025</div>
+            <div>
+              <p class="timeline-item__institution">365DataScience</p>
+              <p class="timeline-item__course"
+                data-i18n-pt="Bootcamp de Ciência de Dados"
+                data-i18n-en="Data Science Bootcamp"
+              >Bootcamp de Ciência de Dados</p>
+              <p class="timeline-item__desc">Online</p>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-item__year">2025</div>
+            <div>
+              <p class="timeline-item__institution">freeCodeCamp</p>
+              <p class="timeline-item__course"
+                data-i18n-pt="Análise de Dados com Python"
+                data-i18n-en="Data Analysis with Python"
+              >Análise de Dados com Python</p>
+              <p class="timeline-item__desc">Online</p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ── Contato ── -->
+      <section class="about-section">
+        <h2 data-i18n="about.contact-title">Contato & Links</h2>
+        <div class="about-links">
+          <a href="/cv-felipe-tome-pereira.pdf" download class="btn btn--primary" data-i18n="about.download-cv">
+            Baixar Currículo
+          </a>
+          <a href="https://github.com/felipetp-ctrl" target="_blank" rel="noopener" class="btn btn--outline">
+            GitHub
+          </a>
+          <a href="https://linkedin.com/in/felipetpereira" target="_blank" rel="noopener" class="btn btn--outline">
+            LinkedIn
+          </a>
+          <a href="mailto:felipetpereira1@gmail.com" class="btn btn--ghost">
+            felipetpereira1@gmail.com
+          </a>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</BaseLayout>

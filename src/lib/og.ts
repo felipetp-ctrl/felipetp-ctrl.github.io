@@ -17,8 +17,11 @@ function loadFonts() {
   ];
 }
 
-export async function generateOgPng(projectTitle?: string): Promise<Uint8Array> {
+export async function generateOgPng(projectTitle?: string, locale: 'pt' | 'en' = 'pt'): Promise<Uint8Array> {
   const fonts = loadFonts();
+  const subtitle = locale === 'en'
+    ? 'ML Research Portfolio · felipetp-ctrl.github.io'
+    : 'Portfolio de Pesquisa em ML · felipetp-ctrl.github.io';
 
   let element: SatoriNode;
 
@@ -66,7 +69,7 @@ export async function generateOgPng(projectTitle?: string): Promise<Uint8Array> 
                   type: 'div',
                   props: {
                     style: { fontSize: 18, color: '#7a7876' },
-                    children: 'ML Research Portfolio · felipetp-ctrl.github.io',
+                    children: subtitle,
                   },
                 },
               ],

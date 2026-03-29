@@ -15,9 +15,11 @@ interface Props {
   status: string;
   study: boolean;
   index: number;
+  locale?: 'pt' | 'en';
 }
 
-const { title, titleEn, description, descriptionEn, technologies, mainResult, mainResultEn, date, slug, github, paper, demo, status, study, index } = Astro.props;
+const { title, titleEn, description, descriptionEn, technologies, mainResult, mainResultEn, date, slug, github, paper, demo, status, study, index, locale } = Astro.props;
+const localePrefix = locale ? `/${locale}` : '';
 
 const statusLabels: Record<string, string> = {
   completed: 'Concluído',
@@ -38,7 +40,7 @@ const num = String(index + 1).padStart(2, '0');
   <div class="project-card__number">[{num}]</div>
 
   <div class="project-card__header">
-    <a href={`/projects/${slug}`} class="project-card__title"
+    <a href={`${localePrefix}/projects/${slug}`} class="project-card__title"
       transition:name={`project-title-${slug}`}
       data-i18n-pt={title}
       data-i18n-en={titleEn || title}
@@ -74,7 +76,7 @@ const num = String(index + 1).padStart(2, '0');
 
   <div class="project-card__footer">
     <div class="project-card__links">
-      <a href={`/projects/${slug}`} class="btn btn--primary" data-i18n="card.view-details">Ver detalhes</a>
+      <a href={`${localePrefix}/projects/${slug}`} class="btn btn--primary" data-i18n="card.view-details">Ver detalhes</a>
       {github && (
         <a href={github} target="_blank" rel="noopener" class="btn btn--ghost">
           GitHub

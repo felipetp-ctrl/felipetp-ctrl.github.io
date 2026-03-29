@@ -7,12 +7,14 @@ interface Props {
   date: string;
   tags: string[];
   slug: string;
+  locale?: 'pt' | 'en';
 }
-const { title, titleEn, description, descriptionEn, date, tags, slug } = Astro.props;
+const { title, titleEn, description, descriptionEn, date, tags, slug, locale } = Astro.props;
+const localePrefix = locale ? `/${locale}` : '';
 ---
 <article class="blog-card">
   <span class="blog-card__date">{date}</span>
-  <a href={`/blog/${slug}`} class="blog-card__title"
+  <a href={`${localePrefix}/blog/${slug}`} class="blog-card__title"
     transition:name={`blog-title-${slug}`}
     data-i18n-pt={title}
     data-i18n-en={titleEn || title}
