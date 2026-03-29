@@ -1,0 +1,44 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BlogPostCard from '../../components/BlogPostCard.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog', p => !p.data.draft))
+  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+---
+
+<BaseLayout
+  title="Blog — Felipe Tomé Pereira | ML Research"
+  description="Notas, projetos e reflexões sobre machine learning, dados e IA."
+>
+  <section class="projects-section">
+    <div class="container--wide">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" data-i18n="nav.blog">Blog</h2>
+          <span class="section-count">{posts.length} {posts.length === 1 ? 'artigo' : 'artigos'}</span>
+        </div>
+      </div>
+
+      {posts.length === 0 ? (
+        <p style="color: var(--text-muted); font-size: 0.9rem;" data-i18n="blog.empty">
+          Nenhum artigo publicado ainda.
+        </p>
+      ) : (
+        <div>
+          {posts.map(post => (
+            <BlogPostCard
+              title={post.data.title}
+              titleEn={post.data.titleEn}
+              description={post.data.description}
+              descriptionEn={post.data.descriptionEn}
+              date={post.data.date}
+              tags={post.data.tags}
+              slug={post.id}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>

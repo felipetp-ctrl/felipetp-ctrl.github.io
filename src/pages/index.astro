@@ -6,6 +6,18 @@ import { getCollection } from 'astro:content';
 
 const allProjects = await getCollection('projects');
 const projects = allProjects.sort((a, b) => a.data.order - b.data.order);
+const allTechs = new Set(projects.flatMap(p => p.data.technologies));
+
+const techGroups = [
+  { labelPt: 'Linguagens',          labelEn: 'Languages',          techs: ['Python'] },
+  { labelPt: 'Frameworks ML',       labelEn: 'ML Frameworks',      techs: ['PyTorch', 'PyTorch Geometric', 'TensorFlow', 'Keras', 'scikit-learn'] },
+  { labelPt: 'LLMs & RAG',          labelEn: 'LLMs & RAG',         techs: ['LlamaIndex', 'Google Gemini 2.5 Flash', 'RAG', 'ReAct'] },
+  { labelPt: 'Arquiteturas',        labelEn: 'Architectures',      techs: ['EdgeConv', 'SimCLR'] },
+  { labelPt: 'Otimizadores',        labelEn: 'Optimizers',         techs: ['AdamW', 'NT-Xent'] },
+  { labelPt: 'Dados & Análise',     labelEn: 'Data & Analysis',    techs: ['Pandas', 'NumPy', 'Matplotlib', 'statsmodels', 'TUDatasets', 'HDF5'] },
+  { labelPt: 'Ferramentas',         labelEn: 'Tools',              techs: ['Jupyter Notebook', 'Streamlit', 'Docker'] },
+].map(g => ({ ...g, techs: g.techs.filter(t => allTechs.has(t)) }))
+ .filter(g => g.techs.length > 0);
 ---
 
 <BaseLayout
@@ -48,6 +60,25 @@ const projects = allProjects.sort((a, b) => a.data.order - b.data.order);
         <span class="section-count">{projects.length} <span data-i18n="projects.works">trabalhos</span></span>
       </div>
 
+      <!-- ── Filter bar ── -->
+      <div class="filter-bar">
+        <label class="filter-label" for="project-filter" data-i18n="filter.label">Filtrar por</label>
+        <select id="project-filter" class="filter-select">
+          <option value="" data-i18n="filter.all">Todos</option>
+          {techGroups.map(group => (
+            <optgroup
+              label={group.labelPt}
+              data-label-pt={group.labelPt}
+              data-label-en={group.labelEn}
+            >
+              {group.techs.map(tech => (
+                <option value={tech}>{tech}</option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+      </div>
+
       <div class="projects-grid">
         {projects.map((project, i) => (
           <ProjectCard
@@ -75,3 +106,19 @@ const projects = allProjects.sort((a, b) => a.data.order - b.data.order);
   <!-- ── Commit Heatmap ── -->
   <CommitHeatmap username="felipetp-ctrl" />
 </BaseLayout>
+
+<script is:inline>
+  document.addEventListener('change', function (e) {
+    var select = e.target.closest('#project-filter');
+    if (!select) return;
+    var tech = select.value;
+    document.querySelectorAll('.project-card[data-filter-tags]').forEach(function (card) {
+      if (!tech) {
+        card.style.display = '';
+      } else {
+        var tags = (card.dataset.filterTags || '').split(',');
+        card.style.display = tags.some(function (t) { return t.trim() === tech; }) ? '' : 'none';
+      }
+    });
+  });
+</script>

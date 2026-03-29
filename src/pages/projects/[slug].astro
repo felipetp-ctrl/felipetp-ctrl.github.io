@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -11,7 +12,7 @@ export async function getStaticPaths() {
 }
 
 const { project } = Astro.props;
-const { Content } = await render(project);
+const { Content, headings } = await render(project);
 
 const statusLabels: Record<string, string> = {
   completed: 'Concluído',
@@ -67,6 +68,7 @@ const statusLabelsEn: Record<string, string> = {
 
       <!-- Title -->
       <h1 style="margin-bottom: 1rem; font-size: 1.6rem; line-height: 1.25;"
+        transition:name={`project-title-${project.id}`}
         data-i18n-pt={project.data.title}
         data-i18n-en={project.data.titleEn || project.data.title}
       >
@@ -108,11 +110,14 @@ const statusLabelsEn: Record<string, string> = {
           </a>
         )}
       </div>
+    </div>
 
-      <!-- Markdown body -->
+    <!-- Markdown body + TOC -->
+    <div class="project-body-wrap">
       <div class="project-page__body">
         <Content />
       </div>
+      <TableOfContents headings={headings} />
     </div>
   </div>
 </BaseLayout>

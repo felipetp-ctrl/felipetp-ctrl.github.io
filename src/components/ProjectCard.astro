@@ -34,11 +34,12 @@ const statusLabelsEn: Record<string, string> = {
 const num = String(index + 1).padStart(2, '0');
 ---
 
-<article class={`project-card${study ? ' project-card--study' : ''}`}>
+<article class={`project-card${study ? ' project-card--study' : ''}`} data-filter-tags={technologies.join(',')}>
   <div class="project-card__number">[{num}]</div>
 
   <div class="project-card__header">
     <a href={`/projects/${slug}`} class="project-card__title"
+      transition:name={`project-title-${slug}`}
       data-i18n-pt={title}
       data-i18n-en={titleEn || title}
     >{title}</a>

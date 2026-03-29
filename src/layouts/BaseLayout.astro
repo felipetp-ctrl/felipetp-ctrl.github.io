@@ -1,4 +1,6 @@
 ---
+import { ClientRouter } from 'astro:transitions';
+
 interface Props {
   title: string;
   description?: string;
@@ -31,6 +33,7 @@ const ogImageURL = new URL(ogImage, Astro.site);
     <meta name="twitter:image" content={ogImageURL} />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <ClientRouter />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <script is:inline>
@@ -54,6 +57,17 @@ const ogImageURL = new URL(ogImage, Astro.site);
           pt: {
             'nav.projects': 'Projetos',
             'nav.activity': 'Atividade',
+            'nav.about': 'Sobre',
+            'filter.label': 'Filtrar por',
+            'filter.all': 'Todos',
+            'about.bio-title': 'Resumo',
+            'about.skills': 'Habilidades Técnicas',
+            'about.experience': 'Experiência Profissional',
+            'about.research': 'Pesquisa',
+            'about.education': 'Formação Acadêmica',
+            'about.present': 'Presente',
+            'about.download-cv': 'Baixar Currículo',
+            'about.contact-title': 'Contato & Links',
             'hero.label': '// portfólio de pesquisa',
             'hero.bio': 'Estudante apaixonado por machine learning, estatística e bancos de dados. Busco aprender e aprofundar continuamente nesses temas, seja reimplementando papers, explorando datasets ou construindo pipelines do zero. Cada projeto é uma oportunidade de entender melhor como os dados se transformam em conhecimento.',
             'hero.contact': 'Contato',
@@ -83,10 +97,26 @@ const ogImageURL = new URL(ogImage, Astro.site);
             '404.title': 'Página não encontrada',
             '404.message': 'Essa página não existe ou foi movida.',
             '404.back': 'Voltar ao início',
+            'toc.title': 'Índice',
+            'nav.blog': 'Blog',
+            'blog.back': '← Voltar ao blog',
+            'blog.read-more': 'Ler mais',
+            'blog.empty': 'Nenhum artigo publicado ainda.',
           },
           en: {
             'nav.projects': 'Projects',
             'nav.activity': 'Activity',
+            'nav.about': 'About',
+            'filter.label': 'Filter by',
+            'filter.all': 'All',
+            'about.bio-title': 'Summary',
+            'about.skills': 'Technical Skills',
+            'about.experience': 'Professional Experience',
+            'about.research': 'Research',
+            'about.education': 'Academic Background',
+            'about.present': 'Present',
+            'about.download-cv': 'Download CV',
+            'about.contact-title': 'Contact & Links',
             'hero.label': '// research portfolio',
             'hero.bio': 'Student passionate about machine learning, statistics and databases. I continuously seek to learn and deepen my knowledge in these areas, whether by reimplementing papers, exploring datasets, or building pipelines from scratch. Each project is an opportunity to better understand how data transforms into knowledge.',
             'hero.contact': 'Contact',
@@ -116,6 +146,11 @@ const ogImageURL = new URL(ogImage, Astro.site);
             '404.title': 'Page not found',
             '404.message': "This page doesn't exist or was moved.",
             '404.back': 'Back to home',
+            'toc.title': 'Contents',
+            'nav.blog': 'Blog',
+            'blog.back': '← Back to blog',
+            'blog.read-more': 'Read more',
+            'blog.empty': 'No articles published yet.',
           },
         };
         function getLang() {
@@ -137,6 +172,8 @@ const ogImageURL = new URL(ogImage, Astro.site);
             <li><a href="/">Home</a></li>
             <li><a href="/#projects" data-i18n="nav.projects">Projetos</a></li>
             <li><a href="/#activity" data-i18n="nav.activity">Atividade</a></li>
+            <li><a href="/about" data-i18n="nav.about">Sobre</a></li>
+            <li><a href="/blog" data-i18n="nav.blog">Blog</a></li>
           </ul>
           <div class="header-controls">
             <div class="lang-switcher" role="group" aria-label="Language">
@@ -167,12 +204,14 @@ const ogImageURL = new URL(ogImage, Astro.site);
           <li><a href="/">Home</a></li>
           <li><a href="/#projects" data-i18n="nav.projects">Projetos</a></li>
           <li><a href="/#activity" data-i18n="nav.activity">Atividade</a></li>
+          <li><a href="/about" data-i18n="nav.about">Sobre</a></li>
+          <li><a href="/blog" data-i18n="nav.blog">Blog</a></li>
         </ul>
       </div>
     </header>
 
 
-    <main>
+    <main transition:animate="fade">
       <slot />
     </main>
 
@@ -190,11 +229,12 @@ const ogImageURL = new URL(ogImage, Astro.site);
 
     <script is:inline>
       (function () {
-        // ── Lang ──
         var LANG_KEY = 'lang';
+
         function getLang() {
           try { return localStorage.getItem(LANG_KEY) || 'pt'; } catch (e) { return 'pt'; }
         }
+
         function applyLang(lang) {
           var UI = window.__i18n.UI;
           document.documentElement.lang = lang === 'en' ? 'en' : 'pt-BR';
@@ -208,27 +248,20 @@ const ogImageURL = new URL(ogImage, Astro.site);
           document.querySelectorAll('[data-body-lang]').forEach(function (el) {
             el.style.display = el.dataset.bodyLang === lang ? '' : 'none';
           });
+          document.querySelectorAll('[data-label-pt]').forEach(function (el) {
+            el.setAttribute('label', lang === 'en' ? (el.dataset.labelEn || '') : el.dataset.labelPt);
+          });
           document.querySelectorAll('.lang-switcher__btn').forEach(function (btn) {
             btn.classList.toggle('lang-switcher__btn--active', btn.dataset.lang === lang);
           });
         }
-        applyLang(getLang());
-        document.querySelectorAll('.lang-switcher__btn').forEach(function (btn) {
-          btn.addEventListener('click', function () {
-            var next = btn.dataset.lang;
-            try { localStorage.setItem(LANG_KEY, next); } catch (e) {}
-            applyLang(next);
-            document.dispatchEvent(new CustomEvent('langchange', { detail: { lang: next } }));
-          });
-        });
 
-        // ── Theme ──
         function getAutoTheme() {
           var hour = new Date().getHours();
-          var isNight = hour >= 18 || hour < 6;
           var prefDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-          return (isNight || prefDark) ? 'dark' : 'light';
+          return (hour >= 18 || hour < 6 || prefDark) ? 'dark' : 'light';
         }
+
         function applyTheme(theme) {
           document.documentElement.classList.add('theme-transitioning');
           if (theme === 'dark') {
@@ -240,49 +273,98 @@ const ogImageURL = new URL(ogImage, Astro.site);
             document.documentElement.classList.remove('theme-transitioning');
           }, 300);
         }
-        var themeBtn = document.getElementById('theme-toggle');
-        if (themeBtn) {
-          themeBtn.addEventListener('click', function () {
-            var current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-            var next = current === 'dark' ? 'light' : 'dark';
-            try { localStorage.setItem('theme', next); } catch (e) {}
-            applyTheme(next);
-          });
-        }
-        // Auto-update theme every minute if user has no saved preference
+
+        // Apply lang immediately to prevent flash on first load
+        applyLang(getLang());
+
+        // ── Event delegation — survives View Transitions DOM swaps ──
+        document.addEventListener('click', function (e) {
+          // Lang switcher
+          var langBtn = e.target.closest('.lang-switcher__btn');
+          if (langBtn) {
+            var nextLang = langBtn.dataset.lang;
+            try { localStorage.setItem(LANG_KEY, nextLang); } catch (ex) {}
+            applyLang(nextLang);
+            document.dispatchEvent(new CustomEvent('langchange', { detail: { lang: nextLang } }));
+            return;
+          }
+          // Theme toggle
+          if (e.target.closest('#theme-toggle')) {
+            var cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+            var nextTheme = cur === 'dark' ? 'light' : 'dark';
+            try { localStorage.setItem('theme', nextTheme); } catch (ex) {}
+            applyTheme(nextTheme);
+            return;
+          }
+          // Hamburger open/close
+          var toggle = e.target.closest('#nav-toggle');
+          if (toggle) {
+            var header = document.querySelector('.site-header');
+            if (header) {
+              var open = header.classList.toggle('nav-open');
+              toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+              var mm = document.getElementById('mobile-menu');
+              if (mm) mm.setAttribute('aria-hidden', open ? 'false' : 'true');
+            }
+            return;
+          }
+          // Mobile menu link — close menu
+          if (e.target.closest('.mobile-menu a')) {
+            var header2 = document.querySelector('.site-header');
+            if (header2) {
+              header2.classList.remove('nav-open');
+              var nt2 = document.getElementById('nav-toggle');
+              var mm2 = document.getElementById('mobile-menu');
+              if (nt2) nt2.setAttribute('aria-expanded', 'false');
+              if (mm2) mm2.setAttribute('aria-hidden', 'true');
+            }
+            return;
+          }
+          // Click outside header — close mobile menu
+          var headerOut = document.querySelector('.site-header');
+          if (headerOut && headerOut.classList.contains('nav-open') && !headerOut.contains(e.target)) {
+            headerOut.classList.remove('nav-open');
+            var ntOut = document.getElementById('nav-toggle');
+            var mmOut = document.getElementById('mobile-menu');
+            if (ntOut) ntOut.setAttribute('aria-expanded', 'false');
+            if (mmOut) mmOut.setAttribute('aria-hidden', 'true');
+          }
+        });
+
+        // Auto theme every minute when no saved preference
         setInterval(function () {
-          var saved = null;
-          try { saved = localStorage.getItem('theme'); } catch (e) {}
-          if (!saved) applyTheme(getAutoTheme());
+          try { if (!localStorage.getItem('theme')) applyTheme(getAutoTheme()); } catch (e) {}
         }, 60000);
 
-        // ── Hamburger menu ──
-        var navToggle = document.getElementById('nav-toggle');
-        var mobileMenu = document.getElementById('mobile-menu');
-        var siteHeader = document.querySelector('.site-header');
-        if (navToggle && siteHeader) {
-          navToggle.addEventListener('click', function () {
-            var open = siteHeader.classList.toggle('nav-open');
-            navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-            if (mobileMenu) mobileMenu.setAttribute('aria-hidden', open ? 'false' : 'true');
-          });
-          // Close on mobile nav link click
-          document.querySelectorAll('.mobile-menu a').forEach(function (link) {
-            link.addEventListener('click', function () {
-              siteHeader.classList.remove('nav-open');
-              navToggle.setAttribute('aria-expanded', 'false');
-              if (mobileMenu) mobileMenu.setAttribute('aria-hidden', 'true');
-            });
-          });
-          // Close when clicking outside the header
-          document.addEventListener('click', function (e) {
-            if (siteHeader.classList.contains('nav-open') && !siteHeader.contains(e.target)) {
-              siteHeader.classList.remove('nav-open');
-              navToggle.setAttribute('aria-expanded', 'false');
-              if (mobileMenu) mobileMenu.setAttribute('aria-hidden', 'true');
+        // ── View Transitions: copy data-theme to new document before swap ──
+        document.addEventListener('astro:before-swap', function (e) {
+          var theme = document.documentElement.getAttribute('data-theme');
+          if (theme) {
+            e.newDocument.documentElement.setAttribute('data-theme', theme);
+          }
+        });
+
+        // ── View Transitions: re-apply lang after each navigation ──
+        document.addEventListener('astro:page-load', function () {
+          applyLang(getLang());
+          // TOC scroll spy
+          var tocLinks = document.querySelectorAll('.toc__link');
+          if (tocLinks.length) {
+            var headingEls = document.querySelectorAll('.project-page__body h2[id], .project-page__body h3[id], .blog-page__body h2[id], .blog-page__body h3[id]');
+            if (headingEls.length) {
+              var obs = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                  if (entry.isIntersecting) {
+                    tocLinks.forEach(function (l) { l.classList.remove('toc__link--active'); });
+                    var active = document.querySelector('.toc__link[href="#' + entry.target.id + '"]');
+                    if (active) active.classList.add('toc__link--active');
+                  }
+                });
+              }, { rootMargin: '-10% 0% -80% 0%', threshold: 0 });
+              headingEls.forEach(function (el) { obs.observe(el); });
             }
-          });
-        }
+          }
+        });
       })();
     </script>
   </body>

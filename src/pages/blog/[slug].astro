@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', p => !p.data.draft);
+  return posts.map(post => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+---
+
+<BaseLayout
+  title={`${post.data.title} — Felipe Tomé Pereira | ML Research`}
+  description={post.data.description}
+  ogImage={`/og/blog/${post.id}.png`}
+>
+  <div class="blog-page">
+    <div class="container">
+      <a href="/blog" class="blog-page__back" data-i18n="blog.back">← Voltar ao blog</a>
+
+      <!-- Meta -->
+      <div class="blog-page__meta">
+        <span class="blog-page__date">{post.data.date}</span>
+        <div class="tags">
+          {post.data.tags.map(t => <span class="tag">{t}</span>)}
+        </div>
+      </div>
+
+      <!-- Title -->
+      <h1 style="margin-bottom: 1rem; font-size: 1.6rem; line-height: 1.25;"
+        transition:name={`blog-title-${post.id}`}
+        data-i18n-pt={post.data.title}
+        data-i18n-en={post.data.titleEn || post.data.title}
+      >
+        {post.data.title}
+      </h1>
+
+      <!-- Description -->
+      <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.8; margin-bottom: 1.5rem;"
+        data-i18n-pt={post.data.description}
+        data-i18n-en={post.data.descriptionEn || post.data.description}
+      >
+        {post.data.description}
+      </p>
+    </div>
+
+    <!-- Body + TOC -->
+    <div class="blog-body-wrap">
+      <div class="blog-page__body">
+        <Content />
+      </div>
+      <TableOfContents headings={headings} />
+    </div>
+  </div>
+</BaseLayout>
