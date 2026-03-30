@@ -751,14 +751,19 @@ function withLocale(path: string): string {
           var url = btn.dataset.copyUrl;
           if (!url) return;
           var isInstagram = btn.dataset.instagram === 'true';
-          // Open Instagram synchronously (before async clipboard) to avoid popup blocker
-          if (isInstagram) {
-            window.open('https://www.instagram.com/', '_blank', 'noopener');
+          if (isInstagram && navigator.share) {
+            // Mobile: native share sheet — user can pick Instagram Stories
+            var shareTitle = btn.closest('[data-share-title]')
+              ? btn.closest('[data-share-title]').dataset.shareTitle
+              : document.title;
+            navigator.share({ title: shareTitle, url: url }).catch(function () {});
+          } else {
+            // Desktop fallback: copy to clipboard
+            navigator.clipboard.writeText(url).then(function () {
+              btn.classList.add('share-btn--copied');
+              setTimeout(function () { btn.classList.remove('share-btn--copied'); }, 1800);
+            });
           }
-          navigator.clipboard.writeText(url).then(function () {
-            btn.classList.add('share-btn--copied');
-            setTimeout(function () { btn.classList.remove('share-btn--copied'); }, 1800);
-          });
         });
 
         // ── Scroll reveal animations ──
