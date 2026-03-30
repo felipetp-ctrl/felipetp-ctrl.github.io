@@ -1,0 +1,97 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  return [{ params: { locale: 'pt' } }, { params: { locale: 'en' } }];
+}
+
+const { locale } = Astro.params as { locale: 'pt' | 'en' };
+
+const posts = await getCollection('blog', p => !p.data.draft);
+
+const tagMap = new Map<string, number>();
+for (const post of posts) {
+  for (const tag of post.data.tags) {
+    tagMap.set(tag, (tagMap.get(tag) ?? 0) + 1);
+  }
+}
+
+const sortedTags = [...tagMap.entries()].sort((a, b) => {
+  if (b[1] !== a[1]) return b[1] - a[1];
+  return a[0].localeCompare(b[0]);
+});
+
+const totalTags = sortedTags.length;
+---
+
+<BaseLayout
+  title="Tags — Blog — Felipe Tomé Pereira | ML Research"
+  description="Todos os tópicos e tags do blog de Felipe Tomé Pereira."
+  locale={locale}
+>
+  <section class="projects-section">
+    <div class="container--wide">
+      <div style="margin-bottom: 1.5rem;">
+        <a
+          href={`/${locale}/blog`}
+          style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem; transition: color 0.15s;"
+          onmouseover="this.style.color='var(--accent)'"
+          onmouseout="this.style.color='var(--text-muted)'"
+          data-i18n-pt="← Blog"
+          data-i18n-en="← Blog"
+        >← Blog</a>
+      </div>
+
+      <div class="section-header">
+        <div>
+          <h2
+            class="section-title"
+            data-i18n-pt="Tags"
+            data-i18n-en="Tags"
+          >Tags</h2>
+          <span class="section-count"
+            data-i18n-pt={`${totalTags} ${totalTags === 1 ? 'tag' : 'tags'}`}
+            data-i18n-en={`${totalTags} ${totalTags === 1 ? 'tag' : 'tags'}`}
+          >{totalTags} {totalTags === 1 ? 'tag' : 'tags'}</span>
+        </div>
+      </div>
+
+      {sortedTags.length === 0 ? (
+        <p
+          style="color: var(--text-muted); font-size: 0.9rem;"
+          data-i18n-pt="Nenhuma tag encontrada."
+          data-i18n-en="No tags found."
+        >Nenhuma tag encontrada.</p>
+      ) : (
+        <div style="display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.5rem;">
+          {sortedTags.map(([tag, count]) => (
+            <a
+              href={`/${locale}/blog/tags/${encodeURIComponent(tag)}`}
+              class="tag-pill"
+            >{tag} ({count})</a>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .tag-pill {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.3rem 0.7rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .tag-pill:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+</style>

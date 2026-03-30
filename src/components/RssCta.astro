@@ -1,0 +1,24 @@
+---
+interface Props {
+  locale?: 'pt' | 'en';
+}
+const { locale = 'pt' } = Astro.props;
+const feedUrl = '/rss.xml';
+---
+
+<div class="rss-cta">
+  <div class="rss-cta__icon">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <circle cx="6.18" cy="17.82" r="2.18"/>
+      <path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/>
+    </svg>
+  </div>
+  <div class="rss-cta__text">
+    <p class="rss-cta__title" data-i18n-pt="Acompanhe via RSS" data-i18n-en="Follow via RSS">Acompanhe via RSS</p>
+    <p class="rss-cta__desc" data-i18n-pt="Receba novos artigos diretamente no seu leitor de feeds favorito." data-i18n-en="Get new articles directly in your favorite feed reader.">Receba novos artigos diretamente no seu leitor de feeds favorito.</p>
+  </div>
+  <button class="share-btn" data-copy-url={feedUrl} aria-label="Copy RSS feed URL">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+    <span data-i18n-pt="Copiar URL" data-i18n-en="Copy URL">Copiar URL</span>
+  </button>
+</div>

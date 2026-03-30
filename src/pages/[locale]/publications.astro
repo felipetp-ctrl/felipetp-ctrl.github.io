@@ -1,0 +1,76 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+
+export async function getStaticPaths() {
+  return [{ params: { locale: 'pt' } }, { params: { locale: 'en' } }];
+}
+
+const { locale } = Astro.params as { locale: 'pt' | 'en' };
+
+const publications = [
+  {
+    title: 'Human-AI Interaction in Knowledge Work: A Qualitative Study',
+    titlePt: 'Interacao Humano-IA no Trabalho do Conhecimento: Um Estudo Qualitativo',
+    authors: 'F. T. Pereira et al.',
+    venue: 'UNIGOU Remote Research Program',
+    year: '2026',
+    status: 'in-progress',
+    statusPt: 'Em andamento',
+    statusEn: 'In progress',
+    links: [],
+  },
+];
+---
+
+<BaseLayout
+  title={locale === 'pt' ? 'Publicacoes — Felipe Tome Pereira' : 'Publications — Felipe Tome Pereira'}
+  description={locale === 'pt' ? 'Publicacoes academicas e papers de Felipe Tome Pereira.' : 'Academic publications and papers by Felipe Tome Pereira.'}
+  locale={locale}
+>
+  <div class="publications-page">
+    <div class="container">
+      <Breadcrumbs items={[
+        { label: 'Home', href: `/${locale}/` },
+        { label: locale === 'pt' ? 'Publicacoes' : 'Publications' },
+      ]} />
+
+      <div class="section-header">
+        <div>
+          <h1 class="section-title" data-i18n-pt="Publicacoes" data-i18n-en="Publications">Publicacoes</h1>
+          <span class="section-count">{publications.length} {locale === 'pt' ? 'publicacao(oes)' : 'publication(s)'}</span>
+        </div>
+      </div>
+
+      <div style="margin-top: 1.5rem;">
+        {publications.map(pub => (
+          <div class="publication-card">
+            <p class="publication-card__title"
+              data-i18n-pt={pub.titlePt}
+              data-i18n-en={pub.title}
+            >{pub.titlePt}</p>
+            <p class="publication-card__authors">{pub.authors}</p>
+            <p class="publication-card__venue">{pub.venue} · {pub.year}
+              <span class={`status status--in-progress`} style="margin-left: 0.5rem;"
+                data-i18n-pt={pub.statusPt}
+                data-i18n-en={pub.statusEn}
+              >{pub.statusPt}</span>
+            </p>
+            {pub.links.length > 0 && (
+              <div class="publication-card__links">
+                {pub.links.map((link: any) => (
+                  <a href={link.url} target="_blank" rel="noopener" class="btn btn--ghost">{link.label}</a>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <p style="margin-top: 2rem; color: var(--text-light); font-size: 0.85rem; font-family: var(--font-mono);"
+        data-i18n-pt="Mais publicacoes em breve."
+        data-i18n-en="More publications coming soon."
+      >Mais publicacoes em breve.</p>
+    </div>
+  </div>
+</BaseLayout>

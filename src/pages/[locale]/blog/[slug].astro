@@ -2,20 +2,32 @@
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import TableOfContents from '../../../components/TableOfContents.astro';
 import { getCollection, render } from 'astro:content';
+import { readingTime } from '../../../lib/readingTime';
 
 export async function getStaticPaths() {
   const locales = ['pt', 'en'] as const;
-  const posts = await getCollection('blog', p => !p.data.draft);
-  return posts.flatMap((post) =>
+  const allPosts = await getCollection('blog', p => !p.data.draft);
+  return allPosts.flatMap((post) =>
     locales.map((locale) => ({
       params: { locale, slug: post.id },
-      props: { post, locale },
+      props: { post, locale, allPosts },
     })),
   );
 }
 
-const { post, locale } = Astro.props as { post: any; locale: 'pt' | 'en' };
+const { post, locale, allPosts } = Astro.props as { post: any; locale: 'pt' | 'en'; allPosts: any[] };
 const { Content, headings } = await render(post);
+const minRead = readingTime(post.body ?? '');
+
+// Series: find sibling posts in the same series
+const seriesPosts = post.data.series
+  ? allPosts
+      .filter((p: any) => p.data.series === post.data.series)
+      .sort((a: any, b: any) => (a.data.seriesOrder ?? 0) - (b.data.seriesOrder ?? 0))
+  : [];
+const seriesIndex = seriesPosts.findIndex((p: any) => p.id === post.id);
+const prevPost = seriesIndex > 0 ? seriesPosts[seriesIndex - 1] : null;
+const nextPost = seriesIndex < seriesPosts.length - 1 ? seriesPosts[seriesIndex + 1] : null;
 ---
 
 <BaseLayout
@@ -31,8 +43,13 @@ const { Content, headings } = await render(post);
       <!-- Meta -->
       <div class="blog-page__meta">
         <span class="blog-page__date">{post.data.date}</span>
+        <span class="blog-page__reading-time">
+          <span data-i18n-pt={`${minRead} min de leitura`} data-i18n-en={`${minRead} min read`}>{minRead} min de leitura</span>
+        </span>
         <div class="tags">
-          {post.data.tags.map(t => <span class="tag">{t}</span>)}
+          {post.data.tags.map(t => (
+            <a href={`/${locale}/blog/tags/${encodeURIComponent(t)}`} class="tag tag--link">{t}</a>
+          ))}
         </div>
       </div>
 
@@ -54,12 +71,83 @@ const { Content, headings } = await render(post);
       </p>
     </div>
 
+    <!-- Series indicator -->
+    {seriesPosts.length > 1 && (
+      <div class="container">
+        <div class="series-box">
+          <p class="series-box__label">
+            <span data-i18n-pt={`Série: ${post.data.series}`} data-i18n-en={`Series: ${post.data.series}`}>
+              Série: {post.data.series}
+            </span>
+            <span class="series-box__progress">{seriesIndex + 1}/{seriesPosts.length}</span>
+          </p>
+          <ol class="series-box__list">
+            {seriesPosts.map((p: any, i: number) => (
+              <li class={p.id === post.id ? 'series-box__item series-box__item--current' : 'series-box__item'}>
+                {p.id === post.id
+                  ? <span>{i + 1}. {p.data.title}</span>
+                  : <a href={`/${locale}/blog/${p.id}`}>{i + 1}. {p.data.title}</a>
+                }
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    )}
+
     <!-- Body + TOC -->
     <div class="blog-body-wrap">
       <div class="blog-page__body">
         <Content />
+
+        <!-- Giscus comments -->
+        <div class="giscus-container">
+          <!-- To enable comments: 1. Enable GitHub Discussions on your repo 2. Install the Giscus GitHub App at https://giscus.app 3. Replace the data-* values below -->
+          <script src="https://giscus.app/client.js"
+            data-repo="felipetp-ctrl/felipetp-ctrl.github.io"
+            data-repo-id="R_kgDORx26Tw"
+            data-category="Announcements"
+            data-category-id="DIC_kwDORx26T84C5kyz"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="bottom"
+            data-theme="preferred_color_scheme"
+            data-lang={locale === 'en' ? 'en' : 'pt'}
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async
+          ></script>
+        </div>
       </div>
       <TableOfContents headings={headings} />
     </div>
+
+    <!-- Series prev/next navigation -->
+    {(prevPost || nextPost) && (
+      <div class="container" style="margin-top:2rem; padding-bottom:2rem;">
+        <div class="series-nav">
+          {prevPost ? (
+            <a href={`/${locale}/blog/${prevPost.id}`} class="series-nav__item series-nav__item--prev">
+              <span class="series-nav__dir" data-i18n-pt="← Anterior" data-i18n-en="← Previous">← Anterior</span>
+              <span class="series-nav__title"
+                data-i18n-pt={prevPost.data.title}
+                data-i18n-en={prevPost.data.titleEn || prevPost.data.title}
+              >{prevPost.data.title}</span>
+            </a>
+          ) : <div />}
+          {nextPost ? (
+            <a href={`/${locale}/blog/${nextPost.id}`} class="series-nav__item series-nav__item--next">
+              <span class="series-nav__dir" data-i18n-pt="Próximo →" data-i18n-en="Next →">Próximo →</span>
+              <span class="series-nav__title"
+                data-i18n-pt={nextPost.data.title}
+                data-i18n-en={nextPost.data.titleEn || nextPost.data.title}
+              >{nextPost.data.title}</span>
+            </a>
+          ) : <div />}
+        </div>
+      </div>
+    )}
   </div>
 </BaseLayout>

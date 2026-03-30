@@ -94,9 +94,15 @@ const skillGroups = [
       <!-- ── Habilidades ── -->
       <section class="about-section">
         <h2 data-i18n="about.skills">Habilidades Técnicas</h2>
+
+        <!-- Tech Radar SVG Chart -->
+        <div class="tech-radar-wrap">
+          <canvas id="tech-radar" width="460" height="460" aria-label="Tech radar chart"></canvas>
+        </div>
+
         <div class="skills-grid">
-          {skillGroups.map(group => (
-            <div class="skill-group">
+          {skillGroups.map((group, i) => (
+            <div class="skill-group" data-radar-index={i}>
               <p class="skill-group__label"
                 data-i18n-pt={group.labelPt}
                 data-i18n-en={group.labelEn}
@@ -294,8 +300,202 @@ const skillGroups = [
             felipetpereira1@gmail.com
           </a>
         </div>
+
+        <!-- Contact Form -->
+        <div class="contact-form-wrap">
+          <h3 style="margin-top:2rem; margin-bottom:1rem; font-size:1rem;"
+            data-i18n-pt="Enviar mensagem"
+            data-i18n-en="Send a message"
+          >Enviar mensagem</h3>
+          <!-- Replace YOUR_FORM_ID with your Formspree form ID from https://formspree.io -->
+          <form class="contact-form" action="https://formspree.io/f/mwvwldzy" method="POST" id="contact-form">
+            <div class="contact-form__row">
+              <label class="contact-form__label" for="contact-name">
+                <span data-i18n-pt="Nome" data-i18n-en="Name">Nome</span>
+              </label>
+              <input class="contact-form__input" type="text" id="contact-name" name="name" required
+                data-placeholder-pt="Seu nome"
+                data-placeholder-en="Your name"
+                placeholder="Seu nome" />
+            </div>
+            <div class="contact-form__row">
+              <label class="contact-form__label" for="contact-email">Email</label>
+              <input class="contact-form__input" type="email" id="contact-email" name="email" required
+                data-placeholder-pt="seu@email.com"
+                data-placeholder-en="your@email.com"
+                placeholder="seu@email.com" />
+            </div>
+            <div class="contact-form__row">
+              <label class="contact-form__label" for="contact-msg">
+                <span data-i18n-pt="Mensagem" data-i18n-en="Message">Mensagem</span>
+              </label>
+              <textarea class="contact-form__input contact-form__textarea" id="contact-msg" name="message" rows="4" required
+                data-placeholder-pt="Sua mensagem..."
+                data-placeholder-en="Your message..."
+                placeholder="Sua mensagem..."
+              ></textarea>
+            </div>
+            <button type="submit" class="btn btn--primary" style="margin-top:0.5rem">
+              <span data-i18n-pt="Enviar" data-i18n-en="Send">Enviar</span>
+            </button>
+            <p class="contact-form__success" id="contact-success" style="display:none; color:var(--green); font-size:0.85rem; margin-top:0.75rem;">
+              <span data-i18n-pt="Mensagem enviada com sucesso!" data-i18n-en="Message sent successfully!">Mensagem enviada com sucesso!</span>
+            </p>
+          </form>
+        </div>
       </section>
 
     </div>
   </div>
 </BaseLayout>
+
+<script is:inline>
+(function () {
+  // ── Tech Radar ──
+  function drawRadar() {
+    var canvas = document.getElementById('tech-radar');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W = canvas.width, H = canvas.height;
+    var cx = W / 2, cy = H / 2;
+    var r = Math.min(W, H) / 2 - 70;
+    var labels = [];
+    document.querySelectorAll('.skill-group').forEach(function (g) {
+      var el = g.querySelector('.skill-group__label');
+      if (el) labels.push(el.textContent.trim());
+    });
+    var n = labels.length;
+    if (n < 3) return;
+    var scores = [0.92, 0.85, 0.80, 0.75, 0.70, 0.65];
+
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    var textColor = isDark ? '#9c9890' : '#6b6760';
+    var gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+    var fillColor = isDark ? 'rgba(122,173,223,0.18)' : 'rgba(27,58,107,0.12)';
+    var strokeColor = isDark ? '#7aaddf' : '#1b3a6b';
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Grid rings
+    for (var ring = 1; ring <= 4; ring++) {
+      ctx.beginPath();
+      for (var i = 0; i < n; i++) {
+        var angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+        var x = cx + (r * ring / 4) * Math.cos(angle);
+        var y = cy + (r * ring / 4) * Math.sin(angle);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = gridColor;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    // Axes
+    for (var i = 0; i < n; i++) {
+      var angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + r * Math.cos(angle), cy + r * Math.sin(angle));
+      ctx.strokeStyle = gridColor;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    // Data polygon
+    ctx.beginPath();
+    for (var i = 0; i < n; i++) {
+      var angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+      var score = scores[i] || 0.65;
+      var x = cx + r * score * Math.cos(angle);
+      var y = cy + r * score * Math.sin(angle);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = fillColor;
+    ctx.fill();
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Points
+    for (var i = 0; i < n; i++) {
+      var angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+      var score = scores[i] || 0.65;
+      var x = cx + r * score * Math.cos(angle);
+      var y = cy + r * score * Math.sin(angle);
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = strokeColor;
+      ctx.fill();
+    }
+
+    // Labels — wrap on '&' or '/' to stay within canvas bounds
+    ctx.font = '11px IBM Plex Mono, monospace';
+    ctx.fillStyle = textColor;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    var labelDist = r + 38;
+    for (var i = 0; i < n; i++) {
+      var angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+      var lx = cx + labelDist * Math.cos(angle);
+      var ly = cy + labelDist * Math.sin(angle);
+      var label = labels[i] || '';
+      // Split on ' & ', ' / ', or at 14 chars if too long
+      var parts;
+      if (label.indexOf(' & ') !== -1) {
+        parts = label.split(' & ');
+      } else if (label.indexOf(' / ') !== -1) {
+        parts = label.split(' / ');
+      } else if (label.length > 14) {
+        var mid = label.lastIndexOf(' ', 14);
+        parts = mid > 0 ? [label.slice(0, mid), label.slice(mid + 1)] : [label.slice(0, 14), label.slice(14)];
+      } else {
+        parts = [label];
+      }
+      var lineH = 14;
+      var startY = ly - ((parts.length - 1) * lineH) / 2;
+      for (var j = 0; j < parts.length; j++) {
+        ctx.fillText(parts[j], lx, startY + j * lineH);
+      }
+    }
+  }
+
+  document.addEventListener('astro:page-load', drawRadar);
+  drawRadar();
+
+  // Re-draw on theme change
+  var obs = new MutationObserver(drawRadar);
+  obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  // Update placeholders on lang change
+  function applyPlaceholders() {
+    var lang = window.__i18n ? window.__i18n.getLang() : 'pt';
+    document.querySelectorAll('[data-placeholder-pt]').forEach(function (el) {
+      el.placeholder = lang === 'en' ? (el.dataset.placeholderEn || '') : el.dataset.placeholderPt;
+    });
+  }
+  document.addEventListener('astro:page-load', applyPlaceholders);
+  document.addEventListener('langchange', applyPlaceholders);
+  applyPlaceholders();
+
+  // Contact form AJAX submission
+  document.addEventListener('submit', function (e) {
+    var form = e.target.closest('#contact-form');
+    if (!form) return;
+    e.preventDefault();
+    var data = new FormData(form);
+    fetch(form.action, { method: 'POST', body: data, headers: { 'Accept': 'application/json' } })
+      .then(function (res) {
+        var success = document.getElementById('contact-success');
+        if (res.ok) {
+          form.reset();
+          if (success) success.style.display = '';
+        } else {
+          alert('Erro ao enviar. Tente novamente.');
+        }
+      })
+      .catch(function () { alert('Erro ao enviar. Verifique sua conexão.'); });
+  });
+})();
+</script>

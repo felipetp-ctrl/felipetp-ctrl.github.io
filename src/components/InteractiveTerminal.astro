@@ -1,0 +1,114 @@
+---
+interface Props {
+  locale?: 'pt' | 'en';
+}
+const { locale = 'pt' } = Astro.props;
+---
+
+<div class="terminal" id="interactive-terminal">
+  <div class="terminal__title-bar">
+    <span class="terminal__dot terminal__dot--red"></span>
+    <span class="terminal__dot terminal__dot--yellow"></span>
+    <span class="terminal__dot terminal__dot--green"></span>
+    <span class="terminal__title-text">felipe@portfolio ~ </span>
+  </div>
+  <div class="terminal__output" id="terminal-output">
+    <div><span class="terminal__prompt">felipe@portfolio:~$</span> help</div>
+    <div data-i18n-pt="Comandos disponiveis:" data-i18n-en="Available commands:">Comandos disponiveis:</div>
+    <div>  whoami    - <span data-i18n-pt="sobre mim" data-i18n-en="about me">sobre mim</span></div>
+    <div>  skills    - <span data-i18n-pt="habilidades tecnicas" data-i18n-en="technical skills">habilidades tecnicas</span></div>
+    <div>  projects  - <span data-i18n-pt="listar projetos" data-i18n-en="list projects">listar projetos</span></div>
+    <div>  blog      - <span data-i18n-pt="ir para o blog" data-i18n-en="go to blog">ir para o blog</span></div>
+    <div>  contact   - <span data-i18n-pt="informacoes de contato" data-i18n-en="contact information">informacoes de contato</span></div>
+    <div>  clear     - <span data-i18n-pt="limpar terminal" data-i18n-en="clear terminal">limpar terminal</span></div>
+    <div>&nbsp;</div>
+  </div>
+  <div class="terminal__input-line">
+    <span class="terminal__prompt">felipe@portfolio:~$</span>&nbsp;
+    <input type="text" class="terminal__input" id="terminal-input" autocomplete="off" spellcheck="false" aria-label="Terminal input" />
+  </div>
+</div>
+
+<script is:inline>
+(function () {
+  function initTerminal() {
+    var input = document.getElementById('terminal-input');
+    var output = document.getElementById('terminal-output');
+    if (!input || !output) return;
+
+    function getLang() {
+      var m = window.location.pathname.match(/^\/(pt|en)(\/|$)/);
+      return m ? m[1] : 'pt';
+    }
+
+    var locale = getLang();
+
+    var commands = {
+      whoami: function () {
+        return locale === 'en'
+          ? 'Felipe Tome Pereira\nData Analyst @ Votorantim CoE\nML & Data Science Enthusiast\nCuritiba, Brazil'
+          : 'Felipe Tome Pereira\nAnalista de Dados @ Votorantim CoE\nEntusiasta de ML & Data Science\nCuritiba, Brasil';
+      },
+      skills: function () {
+        return 'Python, PyTorch, scikit-learn, SQL, Pandas\nGraph Neural Networks, SimCLR, EdgeConv\nPower BI, Streamlit, Docker\nLlamaIndex, Google Gemini, RAG';
+      },
+      projects: function () {
+        return locale === 'en'
+          ? '1. Graph Anomaly Detection (GNN + EdgeConv)\n2. GSoC ML4SCI GENIE (SimCLR)\n3. UFPR Data Hackathon 2025\n4. HOML Deep Learning & Ensemble\n5. Car Price Regression\n\nType "open projects" to navigate.'
+          : '1. Deteccao de Anomalias em Grafos (GNN + EdgeConv)\n2. GSoC ML4SCI GENIE (SimCLR)\n3. Hackathon UFPR Dados 2025\n4. HOML Deep Learning & Ensemble\n5. Regressao de Precos de Carros\n\nDigite "open projects" para navegar.';
+      },
+      blog: function () {
+        window.location.href = '/' + locale + '/blog';
+        return locale === 'en' ? 'Redirecting to blog...' : 'Redirecionando para o blog...';
+      },
+      contact: function () {
+        return 'Email: felipetpereira1@gmail.com\nGitHub: github.com/felipetp-ctrl\nLinkedIn: linkedin.com/in/felipetpereira';
+      },
+      help: function () {
+        return locale === 'en'
+          ? 'Available commands:\n  whoami, skills, projects, blog, contact, clear, help'
+          : 'Comandos disponiveis:\n  whoami, skills, projects, blog, contact, clear, help';
+      },
+      clear: function () {
+        output.innerHTML = '';
+        return '';
+      },
+      'open projects': function () {
+        window.location.href = '/' + locale + '/#projects';
+        return locale === 'en' ? 'Opening projects...' : 'Abrindo projetos...';
+      }
+    };
+
+    input.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      var cmd = input.value.trim().toLowerCase();
+      input.value = '';
+      if (!cmd) return;
+
+      var line = document.createElement('div');
+      line.innerHTML = '<span class="terminal__prompt">felipe@portfolio:~$</span> ' + cmd;
+      output.appendChild(line);
+
+      var handler = commands[cmd];
+      var result = handler ? handler() : (locale === 'en' ? 'Command not found: ' + cmd + '. Type "help" for available commands.' : 'Comando nao encontrado: ' + cmd + '. Digite "help" para ver comandos.');
+
+      if (result) {
+        var resEl = document.createElement('div');
+        resEl.style.whiteSpace = 'pre-wrap';
+        resEl.textContent = result;
+        output.appendChild(resEl);
+      }
+
+      var spacer = document.createElement('div');
+      spacer.innerHTML = '&nbsp;';
+      output.appendChild(spacer);
+
+      var terminal = document.getElementById('interactive-terminal');
+      if (terminal) terminal.scrollTop = terminal.scrollHeight;
+    });
+  }
+
+  document.addEventListener('astro:page-load', initTerminal);
+  initTerminal();
+})();
+</script>

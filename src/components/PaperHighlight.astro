@@ -1,0 +1,29 @@
+---
+interface Props {
+  title: string;
+  titleEn?: string;
+  authors: string;
+  url: string;
+  summary: string;
+  summaryEn?: string;
+  date: string;
+}
+
+const { title, titleEn, authors, url, summary, summaryEn, date } = Astro.props;
+---
+
+<div class="paper-highlight reveal">
+  <p class="paper-highlight__label" data-i18n-pt="Leitura da Semana" data-i18n-en="Paper of the Week">Leitura da Semana</p>
+  <h3 class="paper-highlight__title">
+    <a href={url} target="_blank" rel="noopener noreferrer"
+      data-i18n-pt={title}
+      data-i18n-en={titleEn || title}
+    >{title}</a>
+  </h3>
+  <p class="paper-highlight__authors">{authors}</p>
+  <p class="paper-highlight__summary"
+    data-i18n-pt={summary}
+    data-i18n-en={summaryEn || summary}
+  >{summary}</p>
+  <p class="paper-highlight__date">{date}</p>
+</div>

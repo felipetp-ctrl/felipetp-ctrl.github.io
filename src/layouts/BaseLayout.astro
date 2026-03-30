@@ -130,6 +130,13 @@ function withLocale(path: string): string {
             'blog.back': '← Voltar ao blog',
             'blog.read-more': 'Ler mais',
             'blog.empty': 'Nenhum artigo publicado ainda.',
+            'nav.search': 'Busca',
+            'search.title': 'Busca',
+            'search.placeholder': 'Pesquisar projetos e artigos...',
+            'search.results': 'resultado(s)',
+            'search.empty': 'Nenhum resultado encontrado.',
+            'search.type.project': 'projeto',
+            'search.type.blog': 'artigo',
           },
           en: {
             'nav.projects': 'Projects',
@@ -179,6 +186,13 @@ function withLocale(path: string): string {
             'blog.back': '← Back to blog',
             'blog.read-more': 'Read more',
             'blog.empty': 'No articles published yet.',
+            'nav.search': 'Search',
+            'search.title': 'Search',
+            'search.placeholder': 'Search projects and articles...',
+            'search.results': 'result(s)',
+            'search.empty': 'No results found.',
+            'search.type.project': 'project',
+            'search.type.blog': 'article',
           },
         };
         function getLang() {
@@ -203,6 +217,7 @@ function withLocale(path: string): string {
             <li><a href={withLocale('/#activity')} data-i18n="nav.activity">Atividade</a></li>
             <li><a href={withLocale('/about')} data-i18n="nav.about">Sobre</a></li>
             <li><a href={withLocale('/blog')} data-i18n="nav.blog">Blog</a></li>
+            <li><a href={withLocale('/search')} data-i18n="nav.search">Busca</a></li>
           </ul>
           <div class="header-controls">
             <div class="lang-switcher" role="group" aria-label="Language">
@@ -235,14 +250,53 @@ function withLocale(path: string): string {
           <li><a href={withLocale('/#activity')} data-i18n="nav.activity">Atividade</a></li>
           <li><a href={withLocale('/about')} data-i18n="nav.about">Sobre</a></li>
           <li><a href={withLocale('/blog')} data-i18n="nav.blog">Blog</a></li>
+          <li><a href={withLocale('/search')} data-i18n="nav.search">Busca</a></li>
         </ul>
       </div>
     </header>
 
 
+    <!-- Reading progress bar -->
+    <div id="reading-progress" aria-hidden="true"></div>
+
     <main transition:animate="fade">
       <slot />
     </main>
+
+    <!-- Back to top button -->
+    <button id="back-to-top" aria-label="Back to top" class="back-to-top">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M18 15l-6-6-6 6"/>
+      </svg>
+    </button>
+
+    <!-- Ctrl+K Command Palette -->
+    <div id="cmd-overlay" class="cmd-overlay" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="cmd-modal" role="document">
+        <div class="cmd-modal__header">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="cmd-modal__icon" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input id="cmd-input" type="search" class="cmd-modal__input" autocomplete="off" spellcheck="false"
+            data-placeholder-pt="Pesquisar projetos e artigos..."
+            data-placeholder-en="Search projects and articles..."
+            placeholder="Pesquisar projetos e artigos..." />
+          <kbd class="cmd-modal__esc">ESC</kbd>
+        </div>
+        <div id="cmd-results" class="cmd-modal__results"></div>
+      </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox" aria-hidden="true" role="dialog" aria-modal="true">
+      <button class="lightbox__close" id="lightbox-close" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12"/>
+        </svg>
+      </button>
+      <img id="lightbox-img" src="" alt="" class="lightbox__img" />
+      <p id="lightbox-caption" class="lightbox__caption"></p>
+    </div>
 
     <footer class="site-footer">
       <div class="site-footer__inner">
@@ -315,6 +369,13 @@ function withLocale(path: string): string {
 
         // Apply lang immediately to prevent flash on first load
         applyLang(getLang());
+        // Init interactive features on first load
+        document.addEventListener('DOMContentLoaded', function () {
+          initReadingProgress();
+          initBackToTop();
+          initCopyCode();
+          initLightbox();
+        });
 
         // Redirect root to locale-specific entry.
         if (window.location.pathname === '/') {
@@ -400,9 +461,199 @@ function withLocale(path: string): string {
           }
         });
 
+        // ── Reading progress bar ──
+        function initReadingProgress() {
+          var bar = document.getElementById('reading-progress');
+          if (!bar) return;
+          var body = document.querySelector('.project-page__body, .blog-page__body');
+          if (!body) { bar.style.display = 'none'; return; }
+          bar.style.display = 'block';
+          function updateProgress() {
+            var scrollTop = window.scrollY;
+            var docH = document.documentElement.scrollHeight - window.innerHeight;
+            bar.style.width = docH > 0 ? Math.min(100, (scrollTop / docH) * 100) + '%' : '0%';
+          }
+          window.addEventListener('scroll', updateProgress, { passive: true });
+          updateProgress();
+        }
+
+        // ── Back to top ──
+        function initBackToTop() {
+          var btn = document.getElementById('back-to-top');
+          if (!btn) return;
+          function onScroll() { btn.classList.toggle('back-to-top--visible', window.scrollY > 300); }
+          window.addEventListener('scroll', onScroll, { passive: true });
+          onScroll();
+        }
+        document.addEventListener('click', function (e) {
+          if (e.target.closest('#back-to-top')) window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // ── Copy code buttons ──
+        function initCopyCode() {
+          document.querySelectorAll('.project-page__body pre, .blog-page__body pre').forEach(function (pre) {
+            if (pre.querySelector('.copy-btn')) return;
+            var btn = document.createElement('button');
+            btn.className = 'copy-btn';
+            btn.setAttribute('aria-label', 'Copy code');
+            btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>';
+            pre.style.position = 'relative';
+            pre.appendChild(btn);
+          });
+        }
+        document.addEventListener('click', function (e) {
+          var btn = e.target.closest('.copy-btn');
+          if (!btn) return;
+          var pre = btn.closest('pre');
+          var code = pre ? (pre.querySelector('code') || pre) : null;
+          if (!code) return;
+          navigator.clipboard.writeText(code.textContent || '').then(function () {
+            btn.classList.add('copy-btn--copied');
+            setTimeout(function () { btn.classList.remove('copy-btn--copied'); }, 1800);
+          });
+        });
+
+        // ── Image lightbox ──
+        function initLightbox() {
+          document.querySelectorAll('.project-page__body img, .blog-page__body img').forEach(function (img) {
+            if (img.dataset.lightboxReady) return;
+            img.dataset.lightboxReady = '1';
+            img.style.cursor = 'zoom-in';
+          });
+        }
+        document.addEventListener('click', function (e) {
+          var img = e.target.closest('.project-page__body img, .blog-page__body img');
+          if (img) {
+            var lb = document.getElementById('lightbox');
+            var lbImg = document.getElementById('lightbox-img');
+            var lbCap = document.getElementById('lightbox-caption');
+            if (lb && lbImg) {
+              lbImg.src = img.src;
+              lbImg.alt = img.alt || '';
+              if (lbCap) lbCap.textContent = img.alt || '';
+              lb.setAttribute('aria-hidden', 'false');
+              lb.classList.add('lightbox--open');
+              document.body.style.overflow = 'hidden';
+            }
+            return;
+          }
+          if (e.target.closest('#lightbox-close') || e.target.id === 'lightbox') {
+            var lb2 = document.getElementById('lightbox');
+            if (lb2) {
+              lb2.classList.remove('lightbox--open');
+              lb2.setAttribute('aria-hidden', 'true');
+              document.body.style.overflow = '';
+            }
+          }
+        });
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape') {
+            var lb = document.getElementById('lightbox');
+            if (lb && lb.classList.contains('lightbox--open')) {
+              lb.classList.remove('lightbox--open');
+              lb.setAttribute('aria-hidden', 'true');
+              document.body.style.overflow = '';
+            }
+          }
+        });
+
+        // ── Ctrl+K Command Palette ──
+        var _cmdData = null;
+        function openCmd() {
+          var overlay = document.getElementById('cmd-overlay');
+          var input = document.getElementById('cmd-input');
+          if (!overlay || !input) return;
+          overlay.setAttribute('aria-hidden', 'false');
+          overlay.classList.add('cmd-overlay--open');
+          document.body.style.overflow = 'hidden';
+          input.value = '';
+          document.getElementById('cmd-results').innerHTML = '';
+          // Update placeholder for current lang
+          var lang = getLang();
+          input.placeholder = lang === 'en' ? 'Search projects and articles...' : 'Pesquisar projetos e artigos...';
+          input.focus();
+          if (!_cmdData) {
+            var locale = (window.location.pathname.match(/^\/(pt|en)/) || [])[1] || 'pt';
+            fetch('/' + locale + '/search-data.json')
+              .then(function (r) { return r.json(); })
+              .then(function (d) { _cmdData = d; });
+          }
+        }
+        function closeCmd() {
+          var overlay = document.getElementById('cmd-overlay');
+          if (!overlay) return;
+          overlay.classList.remove('cmd-overlay--open');
+          overlay.setAttribute('aria-hidden', 'true');
+          document.body.style.overflow = '';
+        }
+        document.addEventListener('keydown', function (e) {
+          if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            var overlay = document.getElementById('cmd-overlay');
+            if (overlay && overlay.classList.contains('cmd-overlay--open')) closeCmd();
+            else openCmd();
+            return;
+          }
+          if (e.key === 'Escape') closeCmd();
+        });
+        document.addEventListener('click', function (e) {
+          var overlay = document.getElementById('cmd-overlay');
+          if (overlay && overlay.classList.contains('cmd-overlay--open')) {
+            if (e.target === overlay) closeCmd();
+          }
+        });
+        document.addEventListener('input', function (e) {
+          if (e.target.id !== 'cmd-input') return;
+          var q = e.target.value.trim().toLowerCase();
+          var results = document.getElementById('cmd-results');
+          if (!results) return;
+          if (!q || !_cmdData) { results.innerHTML = ''; return; }
+          var lang = getLang();
+          var filtered = _cmdData.filter(function (item) {
+            var title = lang === 'en' ? item.titleEn : item.title;
+            var desc = lang === 'en' ? item.descriptionEn : item.description;
+            return title.toLowerCase().includes(q) || desc.toLowerCase().includes(q) ||
+              item.tags.some(function (t) { return t.toLowerCase().includes(q); });
+          }).slice(0, 8);
+          if (!filtered.length) {
+            results.innerHTML = '<p class="cmd-modal__empty">' + (lang === 'en' ? 'No results found.' : 'Nenhum resultado encontrado.') + '</p>';
+            return;
+          }
+          results.innerHTML = filtered.map(function (item) {
+            var title = lang === 'en' ? item.titleEn : item.title;
+            var badge = item.type === 'project' ? (lang === 'en' ? 'project' : 'projeto') : 'blog';
+            return '<a href="' + item.url + '" class="cmd-result"><span class="cmd-result__badge cmd-result__badge--' + item.type + '">' + badge + '</span><span class="cmd-result__title">' + title + '</span></a>';
+          }).join('');
+        });
+        document.addEventListener('click', function (e) {
+          if (e.target.closest('.cmd-result')) closeCmd();
+        });
+
+        // ── Scroll reveal animations ──
+        function initReveal() {
+          var els = document.querySelectorAll('.reveal:not(.reveal--visible)');
+          if (!els.length) return;
+          var revealObs = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('reveal--visible');
+                revealObs.unobserve(entry.target);
+              }
+            });
+          }, { threshold: 0.08 });
+          els.forEach(function (el) { revealObs.observe(el); });
+        }
+
         // ── View Transitions: re-apply lang after each navigation ──
         document.addEventListener('astro:page-load', function () {
           applyLang(getLang());
+          initReadingProgress();
+          initBackToTop();
+          initCopyCode();
+          initLightbox();
+          initReveal();
+          // Reset cmd data on locale change
+          _cmdData = null;
           // TOC scroll spy
           var tocLinks = document.querySelectorAll('.toc__link');
           if (tocLinks.length) {

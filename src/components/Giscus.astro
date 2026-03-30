@@ -1,0 +1,43 @@
+---
+<!-- To enable comments:
+  1. Enable GitHub Discussions on your repo
+  2. Install the Giscus GitHub App
+  3. Fill in repo, repoId, category, categoryId props
+-->
+
+interface Props {
+  repo: string;
+  repoId: string;
+  category: string;
+  categoryId: string;
+  lang?: string;
+}
+
+const { repo, repoId, category, categoryId, lang = 'pt' } = Astro.props;
+---
+
+<div
+  class="giscus-container"
+  style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border);"
+>
+  <div class="giscus"></div>
+</div>
+
+<script
+  is:inline
+  src="https://giscus.app/client.js"
+  data-repo={repo}
+  data-repo-id={repoId}
+  data-category={category}
+  data-category-id={categoryId}
+  data-mapping="pathname"
+  data-strict="0"
+  data-reactions-enabled="1"
+  data-emit-metadata="0"
+  data-input-position="bottom"
+  data-theme="preferred_color_scheme"
+  data-lang={lang}
+  data-loading="lazy"
+  crossorigin="anonymous"
+  async
+></script>

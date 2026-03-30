@@ -36,9 +36,13 @@ const statusLabelsEn: Record<string, string> = {
 const num = String(index + 1).padStart(2, '0');
 ---
 
-<article class={`project-card${study ? ' project-card--study' : ''}`} data-filter-tags={technologies.join(',')}>
-  <div class="project-card__number">[{num}]</div>
-
+<article
+  class={`project-card reveal${study ? ' project-card--study' : ''}`}
+  data-filter-tags={technologies.join(',')}
+  data-filter-status={status}
+  data-filter-type={study ? 'study' : 'project'}
+  data-filter-date={date}
+>
   <div class="project-card__header">
     <a href={`${localePrefix}/projects/${slug}`} class="project-card__title"
       transition:name={`project-title-${slug}`}

@@ -1,0 +1,63 @@
+---
+interface Props {
+  locale?: 'pt' | 'en';
+}
+const { locale = 'pt' } = Astro.props;
+
+const models = [
+  {
+    name: 'EdgeConv / GNN',
+    descPt: 'Redes neurais em grafos para deteccao de anomalias em dados estruturados',
+    descEn: 'Graph neural networks for anomaly detection in structured data',
+    project: 'graph-anomaly-detection',
+    color: '#2d6cb5',
+  },
+  {
+    name: 'SimCLR',
+    descPt: 'Aprendizado contrastivo auto-supervisionado para representacoes visuais',
+    descEn: 'Self-supervised contrastive learning for visual representations',
+    project: 'gsoc-ml4sci-genie-submission',
+    color: '#1f5c35',
+  },
+  {
+    name: 'Linear Regression',
+    descPt: 'Modelo de regressao linear multipla para predicao de precos',
+    descEn: 'Multiple linear regression model for price prediction',
+    project: 'multi-linear-regression-car-prices',
+    color: '#7c5c12',
+  },
+  {
+    name: 'Ensemble Methods',
+    descPt: 'Bagging, boosting e stacking para classificacao robusta',
+    descEn: 'Bagging, boosting and stacking for robust classification',
+    project: 'homl-deep-learning-ensemble-unsupervised',
+    color: '#6b3fa0',
+  },
+];
+---
+
+<div class="model-zoo">
+  <div class="container--wide">
+    <h2 class="model-zoo__title" data-i18n-pt="Arquiteturas ML Utilizadas" data-i18n-en="ML Architectures Used">Arquiteturas ML Utilizadas</h2>
+    <div class="model-zoo__grid">
+      {models.map(model => (
+        <a href={`/${locale}/projects/${model.project}`} class="model-zoo__card">
+          <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
+            <circle cx="24" cy="24" r="18" fill="none" stroke={model.color} stroke-width="1.5" opacity="0.3"/>
+            <circle cx="24" cy="12" r="4" fill={model.color} opacity="0.8"/>
+            <circle cx="12" cy="32" r="4" fill={model.color} opacity="0.8"/>
+            <circle cx="36" cy="32" r="4" fill={model.color} opacity="0.8"/>
+            <line x1="24" y1="16" x2="14" y2="28" stroke={model.color} stroke-width="1.5" opacity="0.5"/>
+            <line x1="24" y1="16" x2="34" y2="28" stroke={model.color} stroke-width="1.5" opacity="0.5"/>
+            <line x1="16" y1="32" x2="32" y2="32" stroke={model.color} stroke-width="1.5" opacity="0.5"/>
+          </svg>
+          <p class="model-zoo__card-title">{model.name}</p>
+          <p class="model-zoo__card-desc"
+            data-i18n-pt={model.descPt}
+            data-i18n-en={model.descEn}
+          >{model.descPt}</p>
+        </a>
+      ))}
+    </div>
+  </div>
+</div>

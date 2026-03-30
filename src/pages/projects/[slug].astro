@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import TableOfContents from '../../components/TableOfContents.astro';
 import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -12,7 +11,7 @@ export async function getStaticPaths() {
 }
 
 const { project } = Astro.props;
-const { Content, headings } = await render(project);
+const { Content } = await render(project);
 
 const statusLabels: Record<string, string> = {
   completed: 'Concluído',
@@ -112,12 +111,11 @@ const statusLabelsEn: Record<string, string> = {
       </div>
     </div>
 
-    <!-- Markdown body + TOC -->
-    <div class="project-body-wrap">
+    <!-- Markdown body -->
+    <div class="container">
       <div class="project-page__body">
         <Content />
       </div>
-      <TableOfContents headings={headings} />
     </div>
   </div>
 </BaseLayout>

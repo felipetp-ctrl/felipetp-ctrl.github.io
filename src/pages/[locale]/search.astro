@@ -1,0 +1,221 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  return [{ params: { locale: 'pt' } }, { params: { locale: 'en' } }];
+}
+
+const { locale } = Astro.params as { locale: 'pt' | 'en' };
+
+const allProjects = await getCollection('projects');
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+
+type SearchItem = {
+  type: 'project' | 'blog';
+  title: string;
+  titleEn: string;
+  description: string;
+  descriptionEn: string;
+  tags: string[];
+  url: string;
+};
+
+const searchIndex: SearchItem[] = [
+  ...allProjects.map((project) => ({
+    type: 'project' as const,
+    title: project.data.title,
+    titleEn: project.data.titleEn ?? project.data.title,
+    description: project.data.description,
+    descriptionEn: project.data.descriptionEn ?? project.data.description,
+    tags: project.data.technologies,
+    url: `/${locale}/projects/${project.id}`,
+  })),
+  ...allPosts.map((post) => ({
+    type: 'blog' as const,
+    title: post.data.title,
+    titleEn: post.data.titleEn ?? post.data.title,
+    description: post.data.description,
+    descriptionEn: post.data.descriptionEn ?? post.data.description,
+    tags: post.data.tags,
+    url: `/${locale}/blog/${post.id}`,
+  })),
+];
+
+const pageTitle = locale === 'pt' ? 'Busca' : 'Search';
+---
+
+<BaseLayout title={pageTitle} locale={locale}>
+  <main class="container--wide" style="padding: 3rem 1rem; min-height: 60vh;">
+    <div class="section-header">
+      <h1 class="section-title" data-i18n-pt="Busca" data-i18n-en="Search">
+        {locale === 'pt' ? 'Busca' : 'Search'}
+      </h1>
+    </div>
+
+    <div style="margin-top: 2rem; max-width: 640px;">
+      <input
+        id="search-input"
+        type="search"
+        data-i18n-pt-placeholder="Pesquisar projetos e artigos..."
+        data-i18n-en-placeholder="Search projects and articles..."
+        placeholder={locale === 'pt' ? 'Pesquisar projetos e artigos...' : 'Search projects and articles...'}
+        style="
+          width: 100%;
+          padding: 0.75rem 1rem;
+          font-size: 1rem;
+          font-family: var(--font-mono);
+          background: var(--bg-card);
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          color: var(--text);
+          outline: none;
+          transition: border-color 0.2s;
+          box-sizing: border-box;
+        "
+      />
+    </div>
+
+    <div id="search-meta" style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted); font-family: var(--font-mono); min-height: 1.5rem;"></div>
+
+    <div id="search-results" style="margin-top: 1.5rem; display: grid; gap: 1rem;"></div>
+  </main>
+</BaseLayout>
+
+<script define:vars={{ searchIndex }}>
+  window.__searchIndex = searchIndex;
+
+  const input = document.getElementById('search-input');
+  const resultsContainer = document.getElementById('search-results');
+  const metaContainer = document.getElementById('search-meta');
+
+  function getLang() {
+    return window.__i18n ? window.__i18n.getLang() : 'pt';
+  }
+
+  function escapeHtml(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function renderResults(query) {
+    const lang = getLang();
+    const items = window.__searchIndex || [];
+
+    if (!query || query.trim().length === 0) {
+      resultsContainer.innerHTML = '';
+      metaContainer.textContent = '';
+      return;
+    }
+
+    const q = query.trim().toLowerCase();
+
+    const filtered = items.filter((item) => {
+      const title = lang === 'pt' ? item.title : item.titleEn;
+      const description = lang === 'pt' ? item.description : item.descriptionEn;
+      const tagsMatch = item.tags.some((tag) => tag.toLowerCase().includes(q));
+      return (
+        title.toLowerCase().includes(q) ||
+        description.toLowerCase().includes(q) ||
+        tagsMatch
+      );
+    });
+
+    const resultsLabel = lang === 'pt' ? 'resultado(s)' : 'result(s)';
+    metaContainer.textContent = `${filtered.length} ${resultsLabel}`;
+
+    if (filtered.length === 0) {
+      const emptyMsg = lang === 'pt' ? 'Nenhum resultado encontrado.' : 'No results found.';
+      resultsContainer.innerHTML = `<p style="color: var(--text-muted); font-family: var(--font-mono);">${emptyMsg}</p>`;
+      return;
+    }
+
+    resultsContainer.innerHTML = filtered
+      .map((item) => {
+        const title = lang === 'pt' ? item.title : item.titleEn;
+        const description = lang === 'pt' ? item.description : item.descriptionEn;
+        const badgeLabel =
+          item.type === 'project'
+            ? lang === 'pt'
+              ? 'projeto'
+              : 'project'
+            : 'blog';
+        const badgeColor =
+          item.type === 'project'
+            ? 'var(--accent)'
+            : 'var(--accent-mid, var(--accent))';
+
+        const tagsHtml = item.tags
+          .slice(0, 5)
+          .map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`)
+          .join('');
+
+        return `
+          <a href="${escapeHtml(item.url)}" style="text-decoration: none; color: inherit;">
+            <article style="
+              background: var(--bg-card);
+              border: 1px solid var(--border);
+              border-radius: var(--radius);
+              padding: 1.25rem 1.5rem;
+              transition: border-color 0.2s, box-shadow 0.2s;
+              cursor: pointer;
+            "
+            onmouseover="this.style.borderColor='var(--accent)'; this.style.boxShadow='0 2px 12px rgba(0,0,0,0.08)';"
+            onmouseout="this.style.borderColor='var(--border)'; this.style.boxShadow='none';"
+            >
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                <span style="
+                  font-family: var(--font-mono);
+                  font-size: 0.7rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 0.08em;
+                  color: ${badgeColor};
+                  background: color-mix(in srgb, ${badgeColor} 12%, transparent);
+                  border: 1px solid color-mix(in srgb, ${badgeColor} 30%, transparent);
+                  padding: 0.15rem 0.5rem;
+                  border-radius: 3px;
+                ">${escapeHtml(badgeLabel)}</span>
+                <h2 style="margin: 0; font-size: 1rem; font-weight: 600; color: var(--text);">${escapeHtml(title)}</h2>
+              </div>
+              <p style="margin: 0 0 0.75rem; font-size: 0.875rem; color: var(--text-muted); line-height: 1.5;">${escapeHtml(description)}</p>
+              ${tagsHtml ? `<div class="tags" style="display: flex; flex-wrap: wrap; gap: 0.35rem;">${tagsHtml}</div>` : ''}
+            </article>
+          </a>
+        `;
+      })
+      .join('');
+  }
+
+  if (input) {
+    input.addEventListener('input', (e) => {
+      renderResults(e.target.value);
+    });
+
+    // Update placeholder based on lang
+    function updatePlaceholder() {
+      const lang = getLang();
+      input.placeholder =
+        lang === 'pt'
+          ? 'Pesquisar projetos e artigos...'
+          : 'Search projects and articles...';
+    }
+
+    updatePlaceholder();
+
+    // Re-run when lang changes (via astro:page-load for view transitions)
+    document.addEventListener('astro:page-load', () => {
+      updatePlaceholder();
+      if (input.value) renderResults(input.value);
+    });
+  }
+</script>
+
+<style>
+  #search-input:focus {
+    border-color: var(--accent);
+  }
+</style>

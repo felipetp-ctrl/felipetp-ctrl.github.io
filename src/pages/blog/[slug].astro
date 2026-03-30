@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TableOfContents from '../../components/TableOfContents.astro';
 import { getCollection, render } from 'astro:content';
+import { readingTime } from '../../lib/readingTime';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', p => !p.data.draft);
@@ -13,6 +14,7 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content, headings } = await render(post);
+const minRead = readingTime(post.body ?? '');
 ---
 
 <BaseLayout
@@ -27,8 +29,9 @@ const { Content, headings } = await render(post);
       <!-- Meta -->
       <div class="blog-page__meta">
         <span class="blog-page__date">{post.data.date}</span>
+        <span class="blog-page__reading-time">{minRead} min de leitura</span>
         <div class="tags">
-          {post.data.tags.map(t => <span class="tag">{t}</span>)}
+          {post.data.tags.map(t => <span class="tag tag--link">{t}</span>)}
         </div>
       </div>
 

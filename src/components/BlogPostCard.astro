@@ -8,12 +8,21 @@ interface Props {
   tags: string[];
   slug: string;
   locale?: 'pt' | 'en';
+  readingTimeMin?: number;
 }
-const { title, titleEn, description, descriptionEn, date, tags, slug, locale } = Astro.props;
+const { title, titleEn, description, descriptionEn, date, tags, slug, locale, readingTimeMin } = Astro.props;
 const localePrefix = locale ? `/${locale}` : '';
 ---
-<article class="blog-card">
-  <span class="blog-card__date">{date}</span>
+<article class="blog-card reveal">
+  <div class="blog-card__meta-row">
+    <span class="blog-card__date">{date}</span>
+    {readingTimeMin && (
+      <span class="blog-card__reading-time reading-time-icon">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span data-i18n-pt={`${readingTimeMin} min de leitura`} data-i18n-en={`${readingTimeMin} min read`}>{readingTimeMin} min de leitura</span>
+      </span>
+    )}
+  </div>
   <a href={`${localePrefix}/blog/${slug}`} class="blog-card__title"
     transition:name={`blog-title-${slug}`}
     data-i18n-pt={title}
@@ -24,6 +33,8 @@ const localePrefix = locale ? `/${locale}` : '';
     data-i18n-en={descriptionEn || description}
   >{description}</p>
   <div class="tags" style="margin-top: 0.5rem">
-    {tags.map(t => <span class="tag">{t}</span>)}
+    {tags.map(t => (
+      <a href={`${localePrefix}/blog/tags/${encodeURIComponent(t)}`} class="tag tag--link">{t}</a>
+    ))}
   </div>
 </article>

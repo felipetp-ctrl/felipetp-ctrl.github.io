@@ -1,0 +1,89 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import BlogPostCard from '../../../../components/BlogPostCard.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const locales = ['pt', 'en'] as const;
+  const allPosts = await getCollection('blog', p => !p.data.draft);
+
+  const uniqueTags = [...new Set(allPosts.flatMap(p => p.data.tags))];
+
+  return locales.flatMap(locale =>
+    uniqueTags.map(tag => ({
+      params: { locale, tag },
+      props: {
+        posts: allPosts
+          .filter(p => p.data.tags.includes(tag))
+          .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()),
+        tag,
+      },
+    }))
+  );
+}
+
+const { locale, tag } = Astro.params as { locale: 'pt' | 'en'; tag: string };
+const { posts } = Astro.props as { posts: any[]; tag: string };
+---
+
+<BaseLayout
+  title={`${tag} — Tags — Blog — Felipe Tomé Pereira`}
+  description={`Artigos com a tag "${tag}" no blog de Felipe Tomé Pereira.`}
+  locale={locale}
+>
+  <section class="projects-section">
+    <div class="container--wide">
+      <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+        <a
+          href={`/${locale}/blog/tags`}
+          style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-muted); text-decoration: none; transition: color 0.15s;"
+          onmouseover="this.style.color='var(--accent)'"
+          onmouseout="this.style.color='var(--text-muted)'"
+          data-i18n-pt="← Tags"
+          data-i18n-en="← Tags"
+        >← Tags</a>
+        <a
+          href={`/${locale}/blog`}
+          style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-muted); text-decoration: none; transition: color 0.15s;"
+          onmouseover="this.style.color='var(--accent)'"
+          onmouseout="this.style.color='var(--text-muted)'"
+          data-i18n-pt="← Blog"
+          data-i18n-en="← Blog"
+        >← Blog</a>
+      </div>
+
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">{tag}</h2>
+          <span class="section-count"
+            data-i18n-pt={`${posts.length} ${posts.length === 1 ? 'artigo' : 'artigos'}`}
+            data-i18n-en={`${posts.length} ${posts.length === 1 ? 'article' : 'articles'}`}
+          >{posts.length} {posts.length === 1 ? 'artigo' : 'artigos'}</span>
+        </div>
+      </div>
+
+      {posts.length === 0 ? (
+        <p
+          style="color: var(--text-muted); font-size: 0.9rem;"
+          data-i18n-pt="Nenhum artigo com esta tag."
+          data-i18n-en="No articles with this tag."
+        >Nenhum artigo com esta tag.</p>
+      ) : (
+        <div>
+          {posts.map(post => (
+            <BlogPostCard
+              title={post.data.title}
+              titleEn={post.data.titleEn}
+              description={post.data.description}
+              descriptionEn={post.data.descriptionEn}
+              date={post.data.date}
+              tags={post.data.tags}
+              slug={post.id}
+              locale={locale}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>

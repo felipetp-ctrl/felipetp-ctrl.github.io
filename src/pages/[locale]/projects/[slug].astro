@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import TableOfContents from '../../../components/TableOfContents.astro';
 import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -9,13 +8,26 @@ export async function getStaticPaths() {
   return projects.flatMap((project) =>
     locales.map((locale) => ({
       params: { locale, slug: project.id },
-      props: { project, locale },
+      props: { project, locale, allProjects: projects },
     })),
   );
 }
 
-const { project, locale } = Astro.props as { project: any; locale: 'pt' | 'en' };
-const { Content, headings } = await render(project);
+const { project, locale, allProjects } = Astro.props as { project: any; locale: 'pt' | 'en'; allProjects: any[] };
+const { Content } = await render(project);
+
+// Related projects: same technologies, excluding current
+const related = allProjects
+  .filter(p => p.id !== project.id)
+  .map(p => ({
+    ...p,
+    sharedCount: p.data.technologies.filter((t: string) => project.data.technologies.includes(t)).length,
+  }))
+  .filter(p => p.sharedCount > 0)
+  .sort((a, b) => b.sharedCount - a.sharedCount)
+  .slice(0, 3);
+
+const isPdfPaper = project.data.paper && project.data.paper.endsWith('.pdf');
 
 const statusLabels: Record<string, string> = {
   completed: 'Concluído',
@@ -116,12 +128,58 @@ const statusLabelsEn: Record<string, string> = {
       </div>
     </div>
 
-    <!-- Markdown body + TOC -->
-    <div class="project-body-wrap">
+    <!-- Markdown body -->
+    <div class="container">
       <div class="project-page__body">
         <Content />
+
+        <!-- PDF Viewer for paper links -->
+        {isPdfPaper && (
+          <div class="pdf-viewer">
+            <p class="pdf-viewer__label">
+              <span data-i18n-pt="Visualizar artigo" data-i18n-en="View paper">Visualizar artigo</span>
+            </p>
+            <iframe
+              src={project.data.paper}
+              class="pdf-viewer__frame"
+              title="Paper PDF"
+              loading="lazy"
+            ></iframe>
+            <a href={project.data.paper} target="_blank" rel="noopener" class="btn btn--ghost" style="margin-top:0.75rem; display:inline-flex;">
+              <span data-i18n-pt="Abrir em nova aba" data-i18n-en="Open in new tab">Abrir em nova aba</span>
+            </a>
+          </div>
+        )}
       </div>
-      <TableOfContents headings={headings} />
     </div>
+
+    <!-- Related Projects -->
+    {related.length > 0 && (
+      <div class="container" style="margin-top: 3rem; padding-bottom: 3rem;">
+        <div class="related-projects">
+          <h3 class="related-projects__title">
+            <span data-i18n-pt="Projetos Relacionados" data-i18n-en="Related Projects">Projetos Relacionados</span>
+          </h3>
+          <div class="related-projects__grid">
+            {related.map(p => (
+              <a href={`/${locale}/projects/${p.id}`} class="related-card">
+                <span class="related-card__title"
+                  data-i18n-pt={p.data.title}
+                  data-i18n-en={p.data.titleEn || p.data.title}
+                >{p.data.title}</span>
+                <span class="related-card__shared">
+                  {p.sharedCount} <span data-i18n-pt="tec. em comum" data-i18n-en="shared tech">tec. em comum</span>
+                </span>
+                <div class="tags" style="margin-top:0.5rem">
+                  {p.data.technologies.slice(0,4).map((t: string) => (
+                    <span class={`tag ${project.data.technologies.includes(t) ? 'tag--highlight' : ''}`}>{t}</span>
+                  ))}
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    )}
   </div>
 </BaseLayout>

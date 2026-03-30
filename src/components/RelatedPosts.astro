@@ -1,0 +1,50 @@
+---
+interface Post {
+  id: string;
+  data: {
+    title: string;
+    titleEn?: string;
+    tags: string[];
+    date: string;
+  };
+}
+
+interface Props {
+  currentPost: Post;
+  allPosts: Post[];
+  locale: 'pt' | 'en';
+}
+
+const { currentPost, allPosts, locale } = Astro.props;
+
+const related = allPosts
+  .filter(p => p.id !== currentPost.id)
+  .map(p => ({
+    ...p,
+    sharedTags: p.data.tags.filter(t => currentPost.data.tags.includes(t)).length,
+  }))
+  .filter(p => p.sharedTags > 0)
+  .sort((a, b) => b.sharedTags - a.sharedTags)
+  .slice(0, 3);
+---
+
+{related.length > 0 && (
+  <div class="related-posts">
+    <h3 class="related-posts__title">
+      <span data-i18n-pt="Posts Relacionados" data-i18n-en="Related Posts">Posts Relacionados</span>
+    </h3>
+    <div class="related-posts__grid">
+      {related.map(post => (
+        <a href={`/${locale}/blog/${post.id}`} class="related-post-card">
+          <p class="related-post-card__title"
+            data-i18n-pt={post.data.title}
+            data-i18n-en={post.data.titleEn || post.data.title}
+          >{post.data.title}</p>
+          <span class="related-post-card__tags">
+            {post.sharedTags} <span data-i18n-pt="tags em comum" data-i18n-en="shared tags">tags em comum</span>
+          </span>
+        </a>
+      ))}
+    </div>
+  </div>
+)}
