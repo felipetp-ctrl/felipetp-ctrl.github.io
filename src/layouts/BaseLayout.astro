@@ -751,13 +751,13 @@ function withLocale(path: string): string {
           var url = btn.dataset.copyUrl;
           if (!url) return;
           var isInstagram = btn.dataset.instagram === 'true';
+          // Open Instagram synchronously (before async clipboard) to avoid popup blocker
+          if (isInstagram) {
+            window.open('https://www.instagram.com/', '_blank', 'noopener');
+          }
           navigator.clipboard.writeText(url).then(function () {
             btn.classList.add('share-btn--copied');
             setTimeout(function () { btn.classList.remove('share-btn--copied'); }, 1800);
-            if (isInstagram) {
-              // Instagram has no web share API — open app after copy
-              setTimeout(function () { window.open('https://www.instagram.com/', '_blank', 'noopener'); }, 300);
-            }
           });
         });
 
