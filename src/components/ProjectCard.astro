@@ -18,6 +18,7 @@ interface Props {
   locale?: 'pt' | 'en';
 }
 
+import { techDescriptions } from '../lib/techDescriptions';
 const { title, titleEn, description, descriptionEn, technologies, mainResult, mainResultEn, date, slug, github, paper, demo, status, study, index, locale } = Astro.props;
 const localePrefix = locale ? `/${locale}` : '';
 
@@ -70,9 +71,12 @@ const num = String(index + 1).padStart(2, '0');
   >{mainResult}</div>
 
   <div class="tags">
-    {technologies.slice(0, 5).map((tech) => (
-      <span class="tag">{tech}</span>
-    ))}
+    {technologies.slice(0, 5).map((tech) => {
+      const desc = techDescriptions[tech];
+      return desc
+        ? <span class="tag" data-tooltip={locale === 'en' ? desc.en : desc.pt}>{tech}</span>
+        : <span class="tag">{tech}</span>;
+    })}
     {technologies.length > 5 && (
       <span class="tag">+{technologies.length - 5}</span>
     )}

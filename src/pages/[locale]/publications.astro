@@ -11,14 +11,16 @@ const { locale } = Astro.params as { locale: 'pt' | 'en' };
 const publications = [
   {
     title: 'Human-AI Interaction in Knowledge Work: A Qualitative Study',
-    titlePt: 'Interacao Humano-IA no Trabalho do Conhecimento: Um Estudo Qualitativo',
-    authors: 'F. T. Pereira et al.',
+    titlePt: 'Interação Humano-IA no Trabalho do Conhecimento: Um Estudo Qualitativo',
+    authors: 'Felipe Tomé Pereira et al.',
     venue: 'UNIGOU Remote Research Program',
     year: '2026',
     status: 'in-progress',
     statusPt: 'Em andamento',
     statusEn: 'In progress',
-    links: [],
+    links: [
+      { label: 'Poster PDF', url: '/unigou-poster-2026.pdf' },
+    ],
   },
 ];
 ---
@@ -59,7 +61,35 @@ const publications = [
             {pub.links.length > 0 && (
               <div class="publication-card__links">
                 {pub.links.map((link: any) => (
-                  <a href={link.url} target="_blank" rel="noopener" class="btn btn--ghost">{link.label}</a>
+                  link.url.endsWith('.pdf') ? (
+                    <button
+                      class="btn btn--ghost pdf-toggle-btn"
+                      data-pdf={link.url}
+                      data-i18n-pt="Ver Poster"
+                      data-i18n-en="View Poster"
+                      aria-expanded="false"
+                    >{link.label}</button>
+                  ) : (
+                    <a href={link.url} target="_blank" rel="noopener" class="btn btn--ghost">{link.label}</a>
+                  )
+                ))}
+              </div>
+            )}
+            {pub.links.some((l: any) => l.url.endsWith('.pdf')) && (
+              <div class="pdf-inline-viewer" hidden>
+                {pub.links.filter((l: any) => l.url.endsWith('.pdf')).map((link: any) => (
+                  <>
+                    <iframe
+                      src={link.url}
+                      class="pdf-inline-frame"
+                      title={link.label}
+                      loading="lazy"
+                    ></iframe>
+                    <a href={link.url} target="_blank" rel="noopener" class="btn btn--ghost" style="margin-top: 0.5rem; display: inline-flex;"
+                      data-i18n-pt="Abrir em nova aba"
+                      data-i18n-en="Open in new tab"
+                    >Abrir em nova aba</a>
+                  </>
                 ))}
               </div>
             )}
@@ -74,3 +104,37 @@ const publications = [
     </div>
   </div>
 </BaseLayout>
+
+<script>
+  document.querySelectorAll('.pdf-toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const card = btn.closest('.publication-card');
+      const viewer = card?.querySelector('.pdf-inline-viewer') as HTMLElement | null;
+      if (!viewer) return;
+      const isHidden = viewer.hidden;
+      viewer.hidden = !isHidden;
+      btn.setAttribute('aria-expanded', String(isHidden));
+    });
+  });
+</script>
+
+<style>
+  .pdf-inline-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .pdf-inline-viewer {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.75rem;
+    width: 100%;
+  }
+  .pdf-inline-frame {
+    width: 100%;
+    height: 80vh;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    display: block;
+  }
+</style>

@@ -13,7 +13,17 @@ const { username } = Astro.props;
     </div>
 
     <div id="heatmap-container">
-      <div class="heatmap-error skeleton" style="height: 80px;"></div>
+      <div class="heatmap-skeleton" aria-hidden="true">
+        <div class="heatmap-skeleton__grid">
+          {Array.from({ length: 52 }).map(() => (
+            <div class="heatmap-skeleton__col">
+              {Array.from({ length: 7 }).map(() => (
+                <div class="skeleton-pulse heatmap-skeleton__cell"></div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
 
     <div class="heatmap-stats" id="heatmap-stats" style="display:none">

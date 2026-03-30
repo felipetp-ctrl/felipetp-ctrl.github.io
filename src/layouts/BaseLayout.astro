@@ -6,9 +6,10 @@ interface Props {
   description?: string;
   ogImage?: string;
   locale?: 'pt' | 'en';
+  accent?: string;
 }
 
-const { title, description = 'ML Research Portfolio — Felipe Tome Pereira', ogImage, locale } = Astro.props;
+const { title, description = 'ML Research Portfolio — Felipe Tome Pereira', ogImage, locale, accent } = Astro.props;
 const pathParts = Astro.url.pathname.split('/').filter(Boolean);
 const pathLocale = pathParts[0] === 'pt' || pathParts[0] === 'en' ? (pathParts[0] as 'pt' | 'en') : undefined;
 const currentLocale = locale ?? pathLocale ?? 'pt';
@@ -57,9 +58,21 @@ function withLocale(path: string): string {
     <meta name="twitter:image" content={ogImageURL} />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <ClientRouter />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <slot name="head" />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Felipe Tomé Pereira",
+      "url": Astro.site?.toString(),
+      "jobTitle": "Data Analyst",
+      "sameAs": [
+        "https://github.com/felipetp-ctrl",
+        "https://linkedin.com/in/felipetpereira"
+      ]
+    })} />
+    <ClientRouter />
     <script is:inline>
       // ── 1. Theme early detection (must run before paint to prevent flash) ──
       (function () {
@@ -131,6 +144,7 @@ function withLocale(path: string): string {
             'blog.read-more': 'Ler mais',
             'blog.empty': 'Nenhum artigo publicado ainda.',
             'nav.search': 'Busca',
+            'nav.publications': 'Publicações',
             'search.title': 'Busca',
             'search.placeholder': 'Pesquisar projetos e artigos...',
             'search.results': 'resultado(s)',
@@ -187,6 +201,7 @@ function withLocale(path: string): string {
             'blog.read-more': 'Read more',
             'blog.empty': 'No articles published yet.',
             'nav.search': 'Search',
+            'nav.publications': 'Publications',
             'search.title': 'Search',
             'search.placeholder': 'Search projects and articles...',
             'search.results': 'result(s)',
@@ -204,18 +219,21 @@ function withLocale(path: string): string {
       })();
     </script>
   </head>
-  <body>
+  <body data-accent={accent || undefined}>
+    <a class="skip-link" href="#main-content" data-i18n-pt="Pular para o conteúdo" data-i18n-en="Skip to content">Pular para o conteúdo</a>
+    <div id="sr-announce" aria-live="polite" aria-atomic="true"></div>
     <header class="site-header">
       <div class="site-header__inner">
         <a href={withLocale('/')} class="site-header__logo">
           <span>~/</span>felipetp
         </a>
-        <nav>
+        <nav aria-label="Navegação principal">
           <ul class="site-nav">
             <li><a href={withLocale('/')}>Home</a></li>
             <li><a href={withLocale('/#projects')} data-i18n="nav.projects">Projetos</a></li>
             <li><a href={withLocale('/#activity')} data-i18n="nav.activity">Atividade</a></li>
             <li><a href={withLocale('/about')} data-i18n="nav.about">Sobre</a></li>
+            <li><a href={withLocale('/publications')} data-i18n="nav.publications">Publicações</a></li>
             <li><a href={withLocale('/blog')} data-i18n="nav.blog">Blog</a></li>
             <li><a href={withLocale('/search')} data-i18n="nav.search">Busca</a></li>
           </ul>
@@ -249,6 +267,7 @@ function withLocale(path: string): string {
           <li><a href={withLocale('/#projects')} data-i18n="nav.projects">Projetos</a></li>
           <li><a href={withLocale('/#activity')} data-i18n="nav.activity">Atividade</a></li>
           <li><a href={withLocale('/about')} data-i18n="nav.about">Sobre</a></li>
+          <li><a href={withLocale('/publications')} data-i18n="nav.publications">Publicações</a></li>
           <li><a href={withLocale('/blog')} data-i18n="nav.blog">Blog</a></li>
           <li><a href={withLocale('/search')} data-i18n="nav.search">Busca</a></li>
         </ul>
@@ -259,7 +278,7 @@ function withLocale(path: string): string {
     <!-- Reading progress bar -->
     <div id="reading-progress" aria-hidden="true"></div>
 
-    <main transition:animate="fade">
+    <main id="main-content" transition:animate="fade">
       <slot />
     </main>
 
@@ -271,13 +290,14 @@ function withLocale(path: string): string {
     </button>
 
     <!-- Ctrl+K Command Palette -->
-    <div id="cmd-overlay" class="cmd-overlay" aria-hidden="true" role="dialog" aria-modal="true">
+    <div id="cmd-overlay" class="cmd-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Busca rápida">
       <div class="cmd-modal" role="document">
         <div class="cmd-modal__header">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="cmd-modal__icon" aria-hidden="true">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
           <input id="cmd-input" type="search" class="cmd-modal__input" autocomplete="off" spellcheck="false"
+            aria-label="Pesquisar"
             data-placeholder-pt="Pesquisar projetos e artigos..."
             data-placeholder-en="Search projects and articles..."
             placeholder="Pesquisar projetos e artigos..." />
@@ -287,8 +307,35 @@ function withLocale(path: string): string {
       </div>
     </div>
 
+    <!-- Keyboard Shortcuts Guide -->
+    <div id="kbd-guide-overlay" class="kbd-guide-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Atalhos de teclado">
+      <div class="kbd-guide">
+        <p class="kbd-guide__title" data-i18n-pt="Atalhos de Teclado" data-i18n-en="Keyboard Shortcuts">Atalhos de Teclado</p>
+        <div class="kbd-guide__row">
+          <span class="kbd-guide__desc" data-i18n-pt="Busca rápida" data-i18n-en="Quick search">Busca rápida</span>
+          <span class="kbd-guide__key">Ctrl + K</span>
+        </div>
+        <div class="kbd-guide__row">
+          <span class="kbd-guide__desc" data-i18n-pt="Alternar tema" data-i18n-en="Toggle theme">Alternar tema</span>
+          <span class="kbd-guide__key">T</span>
+        </div>
+        <div class="kbd-guide__row">
+          <span class="kbd-guide__desc" data-i18n-pt="Modo leitura" data-i18n-en="Focus mode">Modo leitura</span>
+          <span class="kbd-guide__key">F</span>
+        </div>
+        <div class="kbd-guide__row">
+          <span class="kbd-guide__desc" data-i18n-pt="Este guia" data-i18n-en="This guide">Este guia</span>
+          <span class="kbd-guide__key">?</span>
+        </div>
+        <div class="kbd-guide__row">
+          <span class="kbd-guide__desc" data-i18n-pt="Fechar modal" data-i18n-en="Close modal">Fechar modal</span>
+          <span class="kbd-guide__key">Esc</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Lightbox -->
-    <div id="lightbox" class="lightbox" aria-hidden="true" role="dialog" aria-modal="true">
+    <div id="lightbox" class="lightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Visualizador de imagem">
       <button class="lightbox__close" id="lightbox-close" aria-label="Close">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M18 6 6 18M6 6l12 12"/>
@@ -371,6 +418,7 @@ function withLocale(path: string): string {
         applyLang(getLang());
         // Init interactive features on first load
         document.addEventListener('DOMContentLoaded', function () {
+          updateActiveNav();
           initReadingProgress();
           initBackToTop();
           initCopyCode();
@@ -411,6 +459,7 @@ function withLocale(path: string): string {
             var nextTheme = cur === 'dark' ? 'light' : 'dark';
             try { localStorage.setItem('theme', nextTheme); } catch (ex) {}
             applyTheme(nextTheme);
+            syncGiscusTheme(nextTheme);
             return;
           }
           // Hamburger open/close
@@ -447,6 +496,16 @@ function withLocale(path: string): string {
             if (mmOut) mmOut.setAttribute('aria-hidden', 'true');
           }
         });
+
+        // ── Giscus theme sync ──
+        function syncGiscusTheme(theme) {
+          var iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage(
+            { giscus: { setConfig: { theme: theme === 'dark' ? 'dark' : 'light' } } },
+            'https://giscus.app'
+          );
+        }
 
         // Auto theme every minute when no saved preference
         setInterval(function () {
@@ -572,6 +631,7 @@ function withLocale(path: string): string {
           var lang = getLang();
           input.placeholder = lang === 'en' ? 'Search projects and articles...' : 'Pesquisar projetos e artigos...';
           input.focus();
+          trapFocus(overlay);
           if (!_cmdData) {
             var locale = (window.location.pathname.match(/^\/(pt|en)/) || [])[1] || 'pt';
             fetch('/' + locale + '/search-data.json')
@@ -586,6 +646,20 @@ function withLocale(path: string): string {
           overlay.setAttribute('aria-hidden', 'true');
           document.body.style.overflow = '';
         }
+        // ── Kbd guide ──
+        function openKbdGuide() {
+          var el = document.getElementById('kbd-guide-overlay');
+          if (el) { el.classList.add('kbd-guide-overlay--open'); el.setAttribute('aria-hidden', 'false'); }
+        }
+        function closeKbdGuide() {
+          var el = document.getElementById('kbd-guide-overlay');
+          if (el) { el.classList.remove('kbd-guide-overlay--open'); el.setAttribute('aria-hidden', 'true'); }
+        }
+        document.addEventListener('click', function (e) {
+          var ov = document.getElementById('kbd-guide-overlay');
+          if (ov && ov.classList.contains('kbd-guide-overlay--open') && e.target === ov) closeKbdGuide();
+        });
+
         document.addEventListener('keydown', function (e) {
           if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
             e.preventDefault();
@@ -594,7 +668,41 @@ function withLocale(path: string): string {
             else openCmd();
             return;
           }
-          if (e.key === 'Escape') closeCmd();
+          // Only fire single-key shortcuts when not in an input
+          var tag = document.activeElement && document.activeElement.tagName;
+          var inInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+          if (!inInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
+            if (e.key === '?') { e.preventDefault(); openKbdGuide(); return; }
+            if (e.key === 't' || e.key === 'T') {
+              var cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+              var nt = cur === 'dark' ? 'light' : 'dark';
+              try { localStorage.setItem('theme', nt); } catch(ex) {}
+              applyTheme(nt); syncGiscusTheme(nt); return;
+            }
+            if (e.key === 'f' || e.key === 'F') {
+              document.body.classList.toggle('focus-mode'); return;
+            }
+          }
+          if (e.key === 'Escape') {
+            closeKbdGuide();
+            closeCmd();
+          }
+          // Arrow navigation in command palette
+          var overlay2 = document.getElementById('cmd-overlay');
+          if (!overlay2 || !overlay2.classList.contains('cmd-overlay--open')) return;
+          if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Enter') return;
+          var results2 = document.querySelectorAll('#cmd-results .cmd-result');
+          if (!results2.length) return;
+          e.preventDefault();
+          var active = document.querySelector('#cmd-results .cmd-result--focused');
+          var idx = -1;
+          results2.forEach(function (el, i) { if (el === active) idx = i; });
+          if (e.key === 'ArrowDown') idx = (idx + 1) % results2.length;
+          else if (e.key === 'ArrowUp') idx = (idx - 1 + results2.length) % results2.length;
+          else if (e.key === 'Enter' && active) { active.click(); return; }
+          results2.forEach(function (el) { el.classList.remove('cmd-result--focused'); });
+          results2[idx].classList.add('cmd-result--focused');
+          results2[idx].scrollIntoView({ block: 'nearest' });
         });
         document.addEventListener('click', function (e) {
           var overlay = document.getElementById('cmd-overlay');
@@ -629,6 +737,30 @@ function withLocale(path: string): string {
           if (e.target.closest('.cmd-result')) closeCmd();
         });
 
+        // ── Focus mode button ──
+        document.addEventListener('click', function (e) {
+          if (e.target.closest('#focus-mode-btn')) {
+            document.body.classList.toggle('focus-mode');
+          }
+        });
+
+        // ── Copy URL buttons (share & RSS) ──
+        document.addEventListener('click', function (e) {
+          var btn = e.target.closest('[data-copy-url]');
+          if (!btn) return;
+          var url = btn.dataset.copyUrl;
+          if (!url) return;
+          var isInstagram = btn.dataset.instagram === 'true';
+          navigator.clipboard.writeText(url).then(function () {
+            btn.classList.add('share-btn--copied');
+            setTimeout(function () { btn.classList.remove('share-btn--copied'); }, 1800);
+            if (isInstagram) {
+              // Instagram has no web share API — open app after copy
+              setTimeout(function () { window.open('https://www.instagram.com/', '_blank', 'noopener'); }, 300);
+            }
+          });
+        });
+
         // ── Scroll reveal animations ──
         function initReveal() {
           var els = document.querySelectorAll('.reveal:not(.reveal--visible)');
@@ -644,9 +776,44 @@ function withLocale(path: string): string {
           els.forEach(function (el) { revealObs.observe(el); });
         }
 
+        // ── Active nav indicator ──
+        function updateActiveNav() {
+          var path = window.location.pathname;
+          document.querySelectorAll('.site-nav a, .mobile-menu a').forEach(function (a) {
+            var href = a.getAttribute('href') || '';
+            // Strip hash for comparison
+            var hrefPath = href.split('#')[0];
+            var isActive = false;
+            if (hrefPath && hrefPath !== '/' && hrefPath !== '/pt/' && hrefPath !== '/en/') {
+              isActive = path.startsWith(hrefPath);
+            }
+            a.classList.toggle('active', isActive);
+          });
+        }
+
+        // ── Focus trap for modals ──
+        function trapFocus(modalEl) {
+          var focusable = modalEl.querySelectorAll('a[href], button:not([disabled]), input, textarea, [tabindex]:not([tabindex="-1"])');
+          if (!focusable.length) return;
+          var first = focusable[0], last = focusable[focusable.length - 1];
+          modalEl.addEventListener('keydown', function handler(e) {
+            if (e.key !== 'Tab') return;
+            if (!modalEl.classList.contains('cmd-overlay--open') && !modalEl.classList.contains('lightbox--open')) {
+              modalEl.removeEventListener('keydown', handler);
+              return;
+            }
+            if (e.shiftKey && document.activeElement === first) {
+              e.preventDefault(); last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+              e.preventDefault(); first.focus();
+            }
+          });
+        }
+
         // ── View Transitions: re-apply lang after each navigation ──
         document.addEventListener('astro:page-load', function () {
           applyLang(getLang());
+          updateActiveNav();
           initReadingProgress();
           initBackToTop();
           initCopyCode();

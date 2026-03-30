@@ -1028,6 +1028,17 @@ html[data-theme="dark"] .filter-select {
   gap: 1.25rem;
 }
 
+.skill-group {
+  padding: 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  transition: border-color 0.2s, background 0.2s;
+}
+.skill-group:hover {
+  border-color: var(--border);
+  background: var(--bg-card);
+}
+
 .skill-group__label {
   font-family: var(--font-mono);
   font-size: 0.63rem;
@@ -1272,6 +1283,14 @@ html[data-theme="dark"] .filter-select {
 .blog-page__body a { color: var(--accent); }
 .blog-page__body blockquote { border-left: 3px solid var(--border); margin: 1.25rem 0; padding: 0.5rem 1rem; color: var(--text-muted); font-style: italic; }
 .blog-page__body hr { border: none; border-top: 1px solid var(--border-light); margin: 2rem 0; }
+.blog-page__body h4 { font-size: 0.95rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.35rem; }
+.blog-page__body h5 { font-size: 0.88rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.3rem; color: var(--text-muted); }
+.blog-page__body strong { font-weight: 700; color: var(--text); }
+.blog-page__body em { font-style: italic; color: var(--text-muted); }
+.blog-page__body table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 1.25rem 0; }
+.blog-page__body th { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.5rem 0.75rem; background: var(--bg-code); border: 1px solid var(--border); text-align: left; }
+.blog-page__body td { padding: 0.5rem 0.75rem; border: 1px solid var(--border-light); vertical-align: top; }
+.blog-page__body tr:nth-child(even) td { background: var(--bg-code); }
 
 /* ── Feature: Hero Animations ── */
 @keyframes fadeSlideUp {
@@ -1530,6 +1549,13 @@ html[data-theme="dark"] .filter-select {
 .tech-radar-wrap canvas {
   max-width: 100%;
   height: auto;
+}
+
+@media (max-width: 500px) {
+  .tech-radar-wrap canvas {
+    width: 320px !important;
+    height: 320px !important;
+  }
 }
 
 /* ── Feature: Contact Form ── */
@@ -1809,7 +1835,8 @@ pre:hover .copy-btn { opacity: 1; }
   transition: background 0.1s;
 }
 
-.cmd-result:hover { background: var(--accent-pale); }
+.cmd-result:hover,
+.cmd-result--focused { background: var(--accent-pale); outline: none; }
 
 .cmd-result__badge {
   font-family: var(--font-mono);
@@ -2058,6 +2085,54 @@ html[data-theme="dark"] .project-stat__value--active { color: #d4a853; }
   min-height: 1rem;
 }
 
+/* Heatmap skeleton grid */
+.heatmap-skeleton__grid {
+  display: flex;
+  gap: 2px;
+  overflow: hidden;
+  max-height: 100px;
+}
+.heatmap-skeleton__col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.heatmap-skeleton__cell {
+  width: 11px;
+  height: 11px;
+  min-height: unset;
+  border-radius: 2px;
+  opacity: 0.7;
+}
+
+/* Search skeleton */
+.search-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+.search-skeleton__item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+}
+.search-skeleton__title {
+  height: 1rem;
+  width: 60%;
+  margin-bottom: 0.75rem;
+}
+.search-skeleton__desc {
+  height: 0.75rem;
+  width: 90%;
+  margin-bottom: 0.5rem;
+}
+.search-skeleton__desc-2 {
+  height: 0.75rem;
+  width: 70%;
+}
+
 /* ============================================================
    F09 — Smooth Page Transitions
    ============================================================ */
@@ -2261,6 +2336,7 @@ html[data-theme="dark"] .project-stat__value--active { color: #d4a853; }
 .share-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem;
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -2268,16 +2344,29 @@ html[data-theme="dark"] .project-stat__value--active { color: #d4a853; }
   background: var(--bg-code);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 0.3rem 0.65rem;
+  padding: 0 0.75rem;
+  height: 2rem;
+  min-width: 5rem;
   text-decoration: none;
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
+  box-sizing: border-box;
+  white-space: nowrap;
+  line-height: 1;
 }
 .share-btn:hover {
   color: var(--accent);
   border-color: var(--accent);
 }
 .share-btn--copied {
+  color: var(--green) !important;
+  border-color: var(--green) !important;
+}
+.share-btn--instagram:hover {
+  color: #e1306c;
+  border-color: #e1306c;
+}
+.share-btn--instagram.share-btn--copied {
   color: var(--green) !important;
   border-color: var(--green) !important;
 }

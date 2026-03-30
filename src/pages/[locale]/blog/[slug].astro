@@ -1,6 +1,10 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import TableOfContents from '../../../components/TableOfContents.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import ShareButtons from '../../../components/ShareButtons.astro';
+import RelatedPosts from '../../../components/RelatedPosts.astro';
+import RssCta from '../../../components/RssCta.astro';
 import { getCollection, render } from 'astro:content';
 import { readingTime } from '../../../lib/readingTime';
 
@@ -36,14 +40,37 @@ const nextPost = seriesIndex < seriesPosts.length - 1 ? seriesPosts[seriesIndex 
   ogImage={`/og/${locale}/blog/${post.id}.png`}
   locale={locale}
 >
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.data.title,
+    "description": post.data.description,
+    "datePublished": post.data.date,
+    "author": { "@type": "Person", "name": "Felipe Tomé Pereira" },
+    "keywords": post.data.tags.join(', '),
+    "url": Astro.site ? new URL(`/${locale}/blog/${post.id}`, Astro.site).toString() : undefined,
+    "image": Astro.site ? new URL(`/og/${locale}/blog/${post.id}.png`, Astro.site).toString() : undefined
+  })} slot="head" />
   <div class="blog-page">
     <div class="container">
+      <Breadcrumbs items={[
+        { label: 'Home', labelEn: 'Home', href: `/${locale}/` },
+        { label: 'Blog', labelEn: 'Blog', href: `/${locale}/blog` },
+        { label: post.data.title, labelEn: post.data.titleEn || post.data.title },
+      ]} />
       <a href={`/${locale}/blog`} class="blog-page__back" data-i18n="blog.back">← Voltar ao blog</a>
+
+      <!-- Focus mode button -->
+      <button id="focus-mode-btn" class="focus-mode-btn" aria-label="Toggle focus mode">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+        <span data-i18n-pt="Modo foco" data-i18n-en="Focus mode">Modo foco</span>
+      </button>
 
       <!-- Meta -->
       <div class="blog-page__meta">
         <span class="blog-page__date">{post.data.date}</span>
-        <span class="blog-page__reading-time">
+        <span class="blog-page__reading-time reading-time-icon">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           <span data-i18n-pt={`${minRead} min de leitura`} data-i18n-en={`${minRead} min read`}>{minRead} min de leitura</span>
         </span>
         <div class="tags">
@@ -100,8 +127,19 @@ const nextPost = seriesIndex < seriesPosts.length - 1 ? seriesPosts[seriesIndex 
       <div class="blog-page__body">
         <Content />
 
+        <!-- Share buttons -->
+        <ShareButtons url={Astro.site ? new URL(`/${locale}/blog/${post.id}`, Astro.site).toString() : `/${locale}/blog/${post.id}`} title={post.data.title} />
+
+        <!-- Related posts -->
+        <RelatedPosts currentPost={post} allPosts={allPosts} locale={locale} />
+
+        <!-- RSS CTA -->
+        <div style="margin-top: 2rem;">
+          <RssCta locale={locale} />
+        </div>
+
         <!-- Giscus comments -->
-        <div class="giscus-container">
+        <div class="giscus-container" style="margin-top: 2rem;">
           <!-- To enable comments: 1. Enable GitHub Discussions on your repo 2. Install the Giscus GitHub App at https://giscus.app 3. Replace the data-* values below -->
           <script src="https://giscus.app/client.js"
             data-repo="felipetp-ctrl/felipetp-ctrl.github.io"

@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import BlogPostCard from '../../../../components/BlogPostCard.astro';
+import Breadcrumbs from '../../../../components/Breadcrumbs.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -33,6 +34,12 @@ const { posts } = Astro.props as { posts: any[]; tag: string };
 >
   <section class="projects-section">
     <div class="container--wide">
+      <Breadcrumbs items={[
+        { label: 'Home', labelEn: 'Home', href: `/${locale}/` },
+        { label: 'Blog', labelEn: 'Blog', href: `/${locale}/blog` },
+        { label: 'Tags', labelEn: 'Tags', href: `/${locale}/blog/tags` },
+        { label: tag },
+      ]} />
       <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
         <a
           href={`/${locale}/blog/tags`}

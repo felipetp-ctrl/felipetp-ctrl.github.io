@@ -1,5 +1,8 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import ShareButtons from '../../../components/ShareButtons.astro';
+import ProjectMetrics from '../../../components/ProjectMetrics.astro';
 import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -48,8 +51,23 @@ const statusLabelsEn: Record<string, string> = {
   ogImage={`/og/${locale}/${project.id}.png`}
   locale={locale}
 >
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "SoftwareSourceCode",
+    "name": project.data.title,
+    "description": project.data.description,
+    "author": { "@type": "Person", "name": "Felipe Tomé Pereira" },
+    "programmingLanguage": project.data.technologies,
+    "url": Astro.site ? new URL(`/${locale}/projects/${project.id}`, Astro.site).toString() : undefined,
+    "codeRepository": project.data.github
+  })} slot="head" />
   <div class="project-page">
     <div class="container">
+      <Breadcrumbs items={[
+        { label: 'Home', labelEn: 'Home', href: `/${locale}/` },
+        { label: 'Projetos', labelEn: 'Projects', href: `/${locale}/#projects` },
+        { label: project.data.title, labelEn: project.data.titleEn || project.data.title },
+      ]} />
       <a href={`/${locale}/`} class="project-page__back" data-i18n="project.back">← Voltar ao portfólio</a>
 
       <!-- Metadata box -->
@@ -132,6 +150,29 @@ const statusLabelsEn: Record<string, string> = {
     <div class="container">
       <div class="project-page__body">
         <Content />
+
+        <!-- Share buttons -->
+        <ShareButtons url={Astro.site ? new URL(`/${locale}/projects/${project.id}`, Astro.site).toString() : `/${locale}/projects/${project.id}`} title={project.data.title} />
+
+        <!-- Giscus comments -->
+        <div class="giscus-container" style="margin-top: 3rem;">
+          <script src="https://giscus.app/client.js"
+            data-repo="felipetp-ctrl/felipetp-ctrl.github.io"
+            data-repo-id="R_kgDORx26Tw"
+            data-category="Announcements"
+            data-category-id="DIC_kwDORx26T84C5kyz"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="bottom"
+            data-theme="preferred_color_scheme"
+            data-lang={locale === 'en' ? 'en' : 'pt'}
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async
+          ></script>
+        </div>
 
         <!-- PDF Viewer for paper links -->
         {isPdfPaper && (

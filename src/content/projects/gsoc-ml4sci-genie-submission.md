@@ -11,6 +11,16 @@ github: "https://github.com/felipetp-ctrl/gsoc-ml4sci-genie-submission"
 featured: true
 status: "completed"
 order: 2
+metrics:
+  - label: "AUC — EdgeConv GNN"
+    labelEn: "AUC — EdgeConv GNN"
+    value: "77.9"
+  - label: "AUC — SimCLR (linear probe)"
+    labelEn: "AUC — SimCLR (linear probe)"
+    value: "63.2"
+  - label: "Pipeline end-to-end"
+    labelEn: "End-to-end pipeline"
+    value: "100"
 ---
 
 <div data-body-lang="pt">

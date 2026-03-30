@@ -2,6 +2,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
 import CommitHeatmap from '../../components/CommitHeatmap.astro';
+import ModelZoo from '../../components/ModelZoo.astro';
+import PaperHighlight from '../../components/PaperHighlight.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -12,6 +14,9 @@ const { locale } = Astro.params as { locale: 'pt' | 'en' };
 
 const allProjects = await getCollection('projects');
 const projects = allProjects.sort((a, b) => a.data.order - b.data.order);
+
+const allHighlights = await getCollection('highlights');
+const activeHighlight = allHighlights.filter(h => h.data.active).sort((a, b) => b.data.date.localeCompare(a.data.date))[0];
 const allTechs = new Set(projects.flatMap(p => p.data.technologies));
 
 const stats = {
@@ -113,23 +118,32 @@ const techGroups = [
         )}
       </div>
 
-      <!-- ── Filter bar ── -->
-      <div class="filter-bar">
-        <label class="filter-label" for="project-filter" data-i18n="filter.label">Filtrar por</label>
-        <select id="project-filter" class="filter-select">
-          <option value="" data-i18n="filter.all">Todos</option>
-          {techGroups.map(group => (
-            <optgroup
-              label={group.labelPt}
-              data-label-pt={group.labelPt}
-              data-label-en={group.labelEn}
-            >
-              {group.techs.map(tech => (
-                <option value={tech}>{tech}</option>
-              ))}
-            </optgroup>
-          ))}
-        </select>
+      <!-- ── Advanced filter bar ── -->
+      <div class="advanced-filter" id="advanced-filter">
+        <input
+          id="project-text-filter"
+          class="advanced-filter__input"
+          type="search"
+          data-placeholder-pt="Buscar projetos..."
+          data-placeholder-en="Search projects..."
+          placeholder="Buscar projetos..."
+          aria-label="Buscar projetos"
+        />
+        <label class="advanced-filter__checkbox-label">
+          <input type="checkbox" id="filter-completed" value="completed" />
+          <span data-i18n-pt="Concluídos" data-i18n-en="Completed">Concluídos</span>
+        </label>
+        <label class="advanced-filter__checkbox-label">
+          <input type="checkbox" id="filter-inprogress" value="in-progress" />
+          <span data-i18n-pt="Em andamento" data-i18n-en="In progress">Em andamento</span>
+        </label>
+        <label class="advanced-filter__checkbox-label">
+          <input type="checkbox" id="filter-study" value="study" />
+          <span data-i18n-pt="Estudos" data-i18n-en="Studies">Estudos</span>
+        </label>
+        <span class="advanced-filter__count" id="filter-count"></span>
+        <button id="filter-reset" class="btn btn--ghost" style="font-size:0.72rem; padding:0.25rem 0.6rem; display:none;"
+          data-i18n-pt="Limpar" data-i18n-en="Clear">Limpar</button>
       </div>
 
       <!-- Grid view -->
@@ -187,26 +201,101 @@ const techGroups = [
     </div>
   </section>
 
+  <!-- ── ML Model Zoo ── -->
+  <ModelZoo locale={locale} />
+
   <!-- ── Commit Heatmap ── -->
   <CommitHeatmap username="felipetp-ctrl" />
+
+  <!-- ── Paper of the Week ── -->
+  {activeHighlight && (
+    <div class="container--wide" style="padding: 2rem 1.5rem 0;">
+      <PaperHighlight
+        title={activeHighlight.data.title}
+        titleEn={activeHighlight.data.titleEn}
+        authors={activeHighlight.data.authors}
+        url={activeHighlight.data.url}
+        summary={activeHighlight.data.summary}
+        summaryEn={activeHighlight.data.summaryEn}
+        date={activeHighlight.data.date}
+      />
+    </div>
+  )}
 </BaseLayout>
 
 <script is:inline>
-  document.addEventListener('change', function (e) {
-    var select = e.target.closest('#project-filter');
-    if (!select) return;
-    var tech = select.value;
-    document.querySelectorAll('.project-card[data-filter-tags]').forEach(function (card) {
-      if (!tech) {
-        card.style.display = '';
-      } else {
-        var tags = (card.dataset.filterTags || '').split(',');
-        card.style.display = tags.some(function (t) { return t.trim() === tech; }) ? '' : 'none';
+  // ── Advanced filter logic ──
+  function applyFilters() {
+    var text = (document.getElementById('project-text-filter')?.value || '').toLowerCase().trim();
+    var completedCb = document.getElementById('filter-completed');
+    var inprogressCb = document.getElementById('filter-inprogress');
+    var studyCb = document.getElementById('filter-study');
+    var filterCompleted = completedCb?.checked;
+    var filterInprogress = inprogressCb?.checked;
+    var filterStudy = studyCb?.checked;
+    var anyStatus = filterCompleted || filterInprogress;
+    var anyCheck = anyStatus || filterStudy;
+    var lang = window.__i18n ? window.__i18n.getLang() : 'pt';
+
+    var cards = document.querySelectorAll('.project-card[data-filter-tags]');
+    var visible = 0;
+    cards.forEach(function (card) {
+      var tags = (card.dataset.filterTags || '').toLowerCase();
+      var status = card.dataset.filterStatus || '';
+      var type = card.dataset.filterType || '';
+      var titleEl = card.querySelector('.project-card__title');
+      var descEl = card.querySelector('.project-card__desc');
+      var title = (lang === 'en' ? (titleEl?.dataset.i18nEn || titleEl?.textContent) : titleEl?.textContent || '').toLowerCase();
+      var desc = (lang === 'en' ? (descEl?.dataset.i18nEn || descEl?.textContent) : descEl?.textContent || '').toLowerCase();
+
+      var textMatch = !text || title.includes(text) || desc.includes(text) || tags.includes(text);
+
+      var statusMatch = true;
+      if (anyStatus) {
+        statusMatch = false;
+        if (filterCompleted && (status === 'completed' || status === 'published')) statusMatch = true;
+        if (filterInprogress && status === 'in-progress') statusMatch = true;
       }
+      var typeMatch = !filterStudy || type === 'study';
+
+      var show = textMatch && statusMatch && typeMatch;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
     });
+
+    var countEl = document.getElementById('filter-count');
+    var resetBtn = document.getElementById('filter-reset');
+    var isFiltering = text || anyCheck;
+    if (countEl) countEl.textContent = isFiltering ? visible + (lang === 'en' ? ' shown' : ' exibidos') : '';
+    if (resetBtn) resetBtn.style.display = isFiltering ? '' : 'none';
+  }
+
+  document.addEventListener('input', function (e) {
+    if (e.target.id === 'project-text-filter') applyFilters();
+  });
+  document.addEventListener('change', function (e) {
+    if (['filter-completed','filter-inprogress','filter-study'].includes(e.target.id)) applyFilters();
+  });
+  document.addEventListener('click', function (e) {
+    if (e.target.id === 'filter-reset') {
+      var tf = document.getElementById('project-text-filter');
+      if (tf) tf.value = '';
+      ['filter-completed','filter-inprogress','filter-study'].forEach(function (id) {
+        var cb = document.getElementById(id);
+        if (cb) cb.checked = false;
+      });
+      applyFilters();
+    }
+  });
+  document.addEventListener('astro:page-load', function () {
+    // update placeholder on lang change
+    var lang = window.__i18n ? window.__i18n.getLang() : 'pt';
+    var tf = document.getElementById('project-text-filter');
+    if (tf) tf.placeholder = lang === 'en' ? 'Search projects...' : 'Buscar projetos...';
+    applyFilters();
   });
 
-  // View toggle (grid / timeline)
+  // ── View toggle (grid / timeline) ──
   document.addEventListener('click', function (e) {
     var btn = e.target.closest('.view-toggle__btn');
     if (!btn) return;
@@ -218,8 +307,7 @@ const techGroups = [
     var timeline = document.getElementById('view-timeline');
     if (grid) grid.style.display = view === 'grid' ? '' : 'none';
     if (timeline) timeline.style.display = view === 'timeline' ? '' : 'none';
-    // Hide filter bar in timeline mode
-    var filterBar = document.querySelector('.filter-bar');
-    if (filterBar) filterBar.style.display = view === 'timeline' ? 'none' : '';
+    var advFilter = document.getElementById('advanced-filter');
+    if (advFilter) advFilter.style.display = view === 'timeline' ? 'none' : '';
   });
 </script>

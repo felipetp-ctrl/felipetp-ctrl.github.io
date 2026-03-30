@@ -11,6 +11,19 @@ github: "https://github.com/felipetp-ctrl/graph-anomaly-detection"
 featured: true
 status: "completed"
 order: 1
+metrics:
+  - label: "AUC — GAE (AIDS)"
+    labelEn: "AUC — GAE (AIDS)"
+    value: "98.9"
+  - label: "AUC — SimCLR (ENZYMES)"
+    labelEn: "AUC — SimCLR (ENZYMES)"
+    value: "68.9"
+  - label: "AUC — SimCLR (COX2)"
+    labelEn: "AUC — SimCLR (COX2)"
+    value: "64.7"
+  - label: "Datasets avaliados"
+    labelEn: "Datasets evaluated"
+    value: "7"
 ---
 
 <div data-body-lang="pt">

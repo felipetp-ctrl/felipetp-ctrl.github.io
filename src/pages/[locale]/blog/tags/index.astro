@@ -23,6 +23,15 @@ const sortedTags = [...tagMap.entries()].sort((a, b) => {
 });
 
 const totalTags = sortedTags.length;
+const maxCount = sortedTags.length > 0 ? sortedTags[0][1] : 1;
+const minCount = sortedTags.length > 0 ? sortedTags[sortedTags.length - 1][1] : 1;
+
+function tagFontSize(count: number): string {
+  if (maxCount === minCount) return '0.82rem';
+  const ratio = (count - minCount) / (maxCount - minCount);
+  const size = 0.75 + ratio * 0.55;
+  return `${size.toFixed(2)}rem`;
+}
 ---
 
 <BaseLayout
@@ -69,7 +78,9 @@ const totalTags = sortedTags.length;
             <a
               href={`/${locale}/blog/tags/${encodeURIComponent(tag)}`}
               class="tag-pill"
-            >{tag} ({count})</a>
+              style={`font-size: ${tagFontSize(count)};`}
+              title={`${count} ${count === 1 ? 'artigo' : 'artigos'}`}
+            >{tag} <span class="tag-pill__count">({count})</span></a>
           ))}
         </div>
       )}
@@ -93,5 +104,10 @@ const totalTags = sortedTags.length;
   .tag-pill:hover {
     color: var(--accent);
     border-color: var(--accent);
+  }
+
+  .tag-pill__count {
+    opacity: 0.6;
+    font-size: 0.85em;
   }
 </style>

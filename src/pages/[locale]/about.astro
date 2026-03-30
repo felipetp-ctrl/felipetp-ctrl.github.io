@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import InteractiveTerminal from '../../components/InteractiveTerminal.astro';
 
 export async function getStaticPaths() {
   return [{ params: { locale: 'pt' } }, { params: { locale: 'en' } }];
@@ -60,7 +61,7 @@ const skillGroups = [
       </header>
 
       <!-- ── Resumo ── -->
-      <section class="about-section">
+      <section class="about-section reveal">
         <h2 data-i18n="about.bio-title">Resumo</h2>
         <div data-body-lang="pt">
           <p>
@@ -92,7 +93,7 @@ const skillGroups = [
       </section>
 
       <!-- ── Habilidades ── -->
-      <section class="about-section">
+      <section class="about-section reveal">
         <h2 data-i18n="about.skills">Habilidades Técnicas</h2>
 
         <!-- Tech Radar SVG Chart -->
@@ -118,7 +119,7 @@ const skillGroups = [
       </section>
 
       <!-- ── Experiência ── -->
-      <section class="about-section">
+      <section class="about-section reveal">
         <h2 data-i18n="about.experience">Experiência Profissional</h2>
         <div class="timeline">
 
@@ -203,7 +204,7 @@ const skillGroups = [
       </section>
 
       <!-- ── Pesquisa ── -->
-      <section class="about-section">
+      <section class="about-section reveal">
         <h2 data-i18n="about.research">Pesquisa</h2>
         <div class="timeline">
           <div class="timeline-item">
@@ -237,7 +238,7 @@ const skillGroups = [
       </section>
 
       <!-- ── Formação ── -->
-      <section class="about-section">
+      <section class="about-section reveal">
         <h2 data-i18n="about.education">Formação Acadêmica</h2>
         <div class="timeline">
 
@@ -283,8 +284,49 @@ const skillGroups = [
         </div>
       </section>
 
+      <!-- ── Certificados ── -->
+      <section class="about-section reveal">
+        <h2 data-i18n-pt="Certificados" data-i18n-en="Certificates">Certificados</h2>
+        <div class="certificates-grid">
+
+          <div class="certificate-card">
+            <p class="certificate-card__name"
+              data-i18n-pt="Data Science Bootcamp"
+              data-i18n-en="Data Science Bootcamp"
+            >Data Science Bootcamp</p>
+            <p class="certificate-card__issuer">365DataScience</p>
+            <p class="certificate-card__date">2025</p>
+          </div>
+
+          <div class="certificate-card">
+            <p class="certificate-card__name"
+              data-i18n-pt="Data Analysis with Python"
+              data-i18n-en="Data Analysis with Python"
+            >Data Analysis with Python</p>
+            <p class="certificate-card__issuer">freeCodeCamp</p>
+            <p class="certificate-card__date">2025</p>
+          </div>
+
+          <div class="certificate-card">
+            <p class="certificate-card__name"
+              data-i18n-pt="Machine Learning Specialization"
+              data-i18n-en="Machine Learning Specialization"
+            >Machine Learning Specialization</p>
+            <p class="certificate-card__issuer">DeepLearning.AI / Coursera</p>
+            <p class="certificate-card__date">2025</p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ── Terminal ── -->
+      <section class="about-section reveal">
+        <h2 data-i18n-pt="Terminal Interativo" data-i18n-en="Interactive Terminal">Terminal Interativo</h2>
+        <InteractiveTerminal locale={locale} />
+      </section>
+
       <!-- ── Contato ── -->
-      <section class="about-section">
+      <section class="about-section reveal">
         <h2 data-i18n="about.contact-title">Contato & Links</h2>
         <div class="about-links">
           <a href="/cv-felipe-tome-pereira.pdf" download class="btn btn--primary" data-i18n="about.download-cv">

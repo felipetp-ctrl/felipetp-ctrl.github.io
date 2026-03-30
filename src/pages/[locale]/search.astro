@@ -101,6 +101,26 @@ const pageTitle = locale === 'pt' ? 'Busca' : 'Search';
       .replace(/"/g, '&quot;');
   }
 
+  function highlight(str, query) {
+    if (!query) return escapeHtml(str);
+    const escaped = escapeHtml(str);
+    const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return escaped.replace(new RegExp('(' + escapedQuery + ')', 'gi'), '<mark class="search-highlight">$1</mark>');
+  }
+
+  function showSkeleton() {
+    resultsContainer.innerHTML = `
+      <div class="search-skeleton">
+        ${[1,2,3].map(() => `
+          <div class="search-skeleton__item">
+            <div class="skeleton-pulse search-skeleton__title"></div>
+            <div class="skeleton-pulse search-skeleton__desc"></div>
+            <div class="skeleton-pulse search-skeleton__desc-2"></div>
+          </div>
+        `).join('')}
+      </div>`;
+  }
+
   function renderResults(query) {
     const lang = getLang();
     const items = window.__searchIndex || [];
@@ -111,6 +131,7 @@ const pageTitle = locale === 'pt' ? 'Busca' : 'Search';
       return;
     }
 
+    showSkeleton();
     const q = query.trim().toLowerCase();
 
     const filtered = items.filter((item) => {
@@ -179,9 +200,9 @@ const pageTitle = locale === 'pt' ? 'Busca' : 'Search';
                   padding: 0.15rem 0.5rem;
                   border-radius: 3px;
                 ">${escapeHtml(badgeLabel)}</span>
-                <h2 style="margin: 0; font-size: 1rem; font-weight: 600; color: var(--text);">${escapeHtml(title)}</h2>
+                <h2 style="margin: 0; font-size: 1rem; font-weight: 600; color: var(--text);">${highlight(title, q)}</h2>
               </div>
-              <p style="margin: 0 0 0.75rem; font-size: 0.875rem; color: var(--text-muted); line-height: 1.5;">${escapeHtml(description)}</p>
+              <p style="margin: 0 0 0.75rem; font-size: 0.875rem; color: var(--text-muted); line-height: 1.5;">${highlight(description, q)}</p>
               ${tagsHtml ? `<div class="tags" style="display: flex; flex-wrap: wrap; gap: 0.35rem;">${tagsHtml}</div>` : ''}
             </article>
           </a>
@@ -217,5 +238,12 @@ const pageTitle = locale === 'pt' ? 'Busca' : 'Search';
 <style>
   #search-input:focus {
     border-color: var(--accent);
+  }
+  .search-highlight {
+    background: color-mix(in srgb, var(--accent) 20%, transparent);
+    color: var(--accent);
+    border-radius: 2px;
+    padding: 0 1px;
+    font-style: normal;
   }
 </style>
